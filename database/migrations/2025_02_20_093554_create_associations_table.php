@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('associations', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('other_info')->nullable();
             $table->enum('type', ['classification', 'badge', 'sector', 'sub_sector'])->default('classification');
             $table->timestamps();

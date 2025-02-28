@@ -29,11 +29,9 @@ class RecordImporter extends Importer
             ImportColumn::make('title')
                 ->requiredMapping(),
             ImportColumn::make('first_name')
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
+                ->requiredMapping(),
             ImportColumn::make('last_name')
-                ->requiredMapping()
-                ->rules(['required', 'max:32']),
+                ->requiredMapping(),
             ImportColumn::make('gender')
                 ->requiredMapping(),
             ImportColumn::make('company')
@@ -106,6 +104,17 @@ class RecordImporter extends Importer
         $this->data['sector'] = $this->resolveAssociationId($this->data['sector'], 'sector');
         $this->data['subsector'] = $this->resolveAssociationId($this->data['subsector'], 'sub_sector');
 
+        if (!empty($this->data['mobile_number'])) {
+            // Convert scientific notation to a regular number (e.g., 3.90523E+11 to 390523000000)
+            if (stripos($this->data['mobile_number'], 'E') !== false) {
+                $this->data['mobile_number'] = sprintf('%.0f', (float) $this->data['mobile_number']);
+            }
+
+            // Ensure the mobile number starts with a '+'
+            if (!str_starts_with($this->data['mobile_number'], '+')) {
+                $this->data['mobile_number'] = '+' . $this->data['mobile_number'];
+            }
+        }
 
         // Convert phone numbers into array format
         if (!empty($this->data['phone'])) {
