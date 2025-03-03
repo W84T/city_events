@@ -9,9 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Record extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'classification',
-        'badge',
+        'resource',
         'sector',
         'subsector',
         'title',
@@ -26,11 +27,7 @@ class Record extends Model
         'job_title',
         'website',
         'company',
-        'scfhs',
-        'other_information',
     ];
-
-    use HasFactory;
     protected $casts = [
         'phone' => 'array',
     ];

@@ -20,6 +20,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -56,8 +57,8 @@ class RecordResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('badge')
-                    ->label(__('form.badge'))
+                TextColumn::make('resource')
+                    ->label(__('form.resource'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -113,11 +114,6 @@ class RecordResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('scfhs')
-                    ->label(__('form.scfhs'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('job_title')
                     ->label(__('form.job_title'))
                     ->searchable()
@@ -131,10 +127,10 @@ class RecordResource extends Resource
                     ->searchable()
                     ->options(Association::where('type', 'classification')->pluck('name', 'name'))
                     ->preload(),
-                SelectFilter::make('badge')
-                    ->label(__('form.badge'))
+                SelectFilter::make('resource')
+                    ->label(__('form.resource'))
                     ->searchable()
-                    ->options(Association::where('type', 'badge')->pluck('name', 'name'))
+                    ->options(Association::where('type', 'resource')->pluck('name', 'name'))
                     ->preload(),
                 SelectFilter::make('sector')
                     ->label(__('form.sector'))
@@ -189,7 +185,7 @@ class RecordResource extends Resource
                     ->schema([
                         Group::make([
                             $filters['classification'],
-                            $filters['badge'],
+                            $filters['resource'],
                             $filters['sector'],
                             $filters['subSector'],
                         ])->columns(4), // Arrange these 4 filters in 4 columns
@@ -218,8 +214,8 @@ class RecordResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(RecordExporter::class)
-                    ->icon('heroicon-o-arrow-down-tray') // Add an icon for export
-                    ->color('primary'), // Set the color to primary
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('primary'),
                 ImportAction::make()
                     ->importer(RecordImporter::class)
                     ->icon('heroicon-o-arrow-up-tray') // Add an icon for import
@@ -239,178 +235,162 @@ class RecordResource extends Resource
         return $form
             ->schema([
                 Group::make()->schema([
-                    Section::make(__('form.association'))->schema([
-
-                        Select::make('classification')
-                            ->searchable()
-                            ->preload()
-                            ->label(__('form.classification'))
-                            ->options(Association::where('type', 'classification')->pluck('name', 'name')) // Fetch options from the associations table
-                            ->createOptionForm([
-                                TextInput::make('name')
-                                    ->label(__('form.name'))
-                                    ->maxLength(255),
-                                TextInput::make('other_info')
-                                    ->label(__('form.other_info'))
-                                    ->maxLength(255),
-                                TextInput::make('type')
-                                    ->hidden() // Hide this field as it will be set programmatically
-                                    ->default('classification') // Set the type to 'classification'
-                            ]),
-
-                        Select::make('badge')
-                            ->searchable()
-                            ->preload()
-                            ->label(__('form.badge'))
-                            ->options(Association::where('type', 'badge')->pluck('name', 'name')) // Fetch options from the associations table
-                            ->createOptionForm([
-                                TextInput::make('name')
-                                    ->label(__('form.name'))
-                                    ->maxLength(255),
-                                TextInput::make('other_info')
-                                    ->label(__('form.other_info'))
-                                    ->maxLength(255),
-                                TextInput::make('type')
-                                    ->hidden() // Hide this field as it will be set programmatically
-                                    ->default('badge') // Set the type to 'badge'
-                            ]),
-
-                        Select::make('sector')
-                            ->searchable()
-                            ->preload()
-                            ->label(__('form.sector'))
-                            ->options(Association::where('type', 'sector')->pluck('name', 'name')) // Fetch options from the associations table
-                            ->createOptionForm([
-                                TextInput::make('name')
-                                    ->label(__('form.name'))
-                                    ->maxLength(255),
-                                TextInput::make('other_info')
-                                    ->label(__('form.other_info'))
-                                    ->maxLength(255),
-                                TextInput::make('type')
-                                    ->hidden() // Hide this field as it will be set programmatically
-                                    ->default('sector') // Set the type to 'sector'
-                            ]),
-
-                        Select::make('subsector')
-                            ->searchable()
-                            ->preload()
-                            ->label(__('form.subSector'))
-                            ->options(Association::where('type', 'sub_sector')->pluck('name', 'name')) // Fetch options from the associations table
-                            ->createOptionForm([
-                                TextInput::make('name')
-                                    ->label(__('form.name'))
-                                    ->maxLength(255),
-                                TextInput::make('other_info')
-                                    ->label(__('form.other_info'))
-                                    ->maxLength(255),
-                                TextInput::make('type')
-                                    ->hidden() // Hide this field as it will be set programmatically
-                                    ->default('sub_sector') // Set the type to 'sub_sector'
-                            ]),
-                    ])
-                ])->columnSpan(1),
-                Group::make([
-                    Section::make(__('form.information'))->schema([
-                        TextInput::make('first_name')
-                            ->label(__('form.first_name'))
-                            ->maxLength(255),
-
-                        TextInput::make('last_name')
-                            ->label(__('form.last_name'))
-                            ->maxLength(255),
-
-                        TextInput::make('email')
-                            ->label(__('form.email'))
-                            ->maxLength(255)
-                            ->unique(Record::class, 'email', ignoreRecord: true)
-                            ->dehydrated()
-                            ->regex('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'),
-
-
-                        PhoneInput::make('mobile_number')
-                            ->label(__('form.mobile_number'))
-                            ->excludeCountries(['IL'])
-                            ->validateFor($country = 'AUTO', $type = null, false),
-
-                        Radio::make('gender')
-                            ->options([
-                                'male' => __('form.male'),
-                                'female' => __('form.female'),
-                            ])
-                            ->inline()
-                            ->inlineLabel(false),
-
-                        Select::make('title')
-                            ->label(__('form.title'))
-                            ->options([
-                                'Mr.' => 'Mr',
-                                'Mrs' => 'Ms',
-                                'other' => 'Other',
-                            ]),
-
-                        Select::make('country')
-                            ->live()
-                            ->label(__('form.country'))
-                            ->relationship('countryRelation', 'name')
-                            ->searchable()
-                            ->preload(),
-
-                        Select::make('city')
-                            ->label(__('form.city'))
-                            ->options(function (Get $get): Collection {
-                                $countryId = $get('country');
-
-                                if (!$countryId) {
-                                    return collect();
-                                }
-
-                                return State::query()
-                                    ->where('country_id', $countryId)
-                                    ->pluck('name', 'id');
-                            })
-                            ->searchable()
-                            ->preload(),
-                    ])->columns(2),
-                ])->columnSpan(2)->columns(2),
-
-                Section::make(__('form.other_information'))->schema([
-                    Group::make()->schema([
-                        TextInput::make('company')
-                            ->label(__('form.company'))
-                            ->maxLength(255),
-
-                        TextInput::make('job_title')
-                            ->label(__('form.job_title'))
-                            ->maxLength(255),
-
-                        TextInput::make('website')
-                            ->label(__('form.website'))
-                            ->maxLength(255),
-
-                        TextInput::make('scfhs')
-                            ->label(__('form.scfhs'))
-                            ->maxLength(255),
-                    ])->columns(2),
-                    MarkdownEditor::make('other_information')
-                        ->label(__('form.other_information')),
-                ])->columnSpan(2),
-
-                // New section for phone numbers on the right side
-                Section::make(__('form.phone_numbers'))->schema([
-                    Repeater::make('phone')
-                        ->label(__('form.phone_numbers'))
+                    Section::make(__('form.association'))
+                        ->columns(4) // Four columns for better layout
                         ->schema([
-                            TextInput::make('number')
-                                ->label(__('form.phone_number'))
+                            Select::make('classification')
+                                ->searchable()
+                                ->preload()
+                                ->label(__('form.classification'))
+                                ->options(Association::where('type', 'classification')->pluck('name', 'name'))
+                                ->createOptionForm([
+                                    TextInput::make('name')->label(__('form.name'))->maxLength(255),
+                                    TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
+                                    TextInput::make('type')->hidden()->default('classification'),
+                                ]),
+
+                            Select::make('resource')
+                                ->searchable()
+                                ->preload()
+                                ->label(__('form.resource'))
+                                ->options(Association::where('type', 'resource')->pluck('name', 'name'))
+                                ->createOptionForm([
+                                    TextInput::make('name')->label(__('form.name'))->maxLength(255),
+                                    TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
+                                    TextInput::make('type')->hidden()->default('resource'),
+                                ]),
+
+                            Select::make('sector')
+                                ->searchable()
+                                ->preload()
+                                ->label(__('form.sector'))
+                                ->options(Association::where('type', 'sector')->pluck('name', 'name'))
+                                ->createOptionForm([
+                                    TextInput::make('name')->label(__('form.name'))->maxLength(255),
+                                    TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
+                                    TextInput::make('type')->hidden()->default('sector'),
+                                ]),
+
+                            Select::make('subsector')
+                                ->searchable()
+                                ->preload()
+                                ->label(__('form.subSector'))
+                                ->options(Association::where('type', 'sub_sector')->pluck('name', 'name'))
+                                ->createOptionForm([
+                                    TextInput::make('name')->label(__('form.name'))->maxLength(255),
+                                    TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
+                                    TextInput::make('type')->hidden()->default('sub_sector'),
+                                ]),
+                        ]),
+
+                    Section::make(__('form.information'))
+                        ->columns(4) // Ensures proper layout per row
+                        ->schema([
+                            // Row 1: Title | First Name | Last Name | Gender
+                            TextInput::make('title')
+                                ->label(__('form.title'))
+                                ->autocomplete(false)
+                                ->datalist([
+                                    'Mr.',
+                                    'Mrs.',
+                                    'Ms.',
+                                    'Miss',
+                                    'Mx.',
+                                    'Dr.',
+                                    'Prof.',
+                                    'Eng.',
+                                    'Arch.',
+                                ]),
+
+
+        TextInput::make('first_name')
+                                ->label(__('form.first_name'))
                                 ->maxLength(255),
-                        ])
-                        ->orderable('number')
-                        ->defaultItems(1)
-                        ->columnSpanFull(),
-                ])->columnSpan(1),  // New section for phone numbers (on the right)
-            ])->columns(3);  // Ensuring the entire form is 3 columns wide
+
+                            TextInput::make('last_name')
+                                ->label(__('form.last_name'))
+                                ->maxLength(255),
+
+                            Radio::make('gender')
+                                ->options([
+                                    'male' => __('form.male'),
+                                    'female' => __('form.female'),
+                                ])
+                                ->inline()
+                                ->inlineLabel(false),
+
+                            // Row 2: Email | Mobile Number
+                            TextInput::make('email')
+                                ->label(__('form.email'))
+                                ->maxLength(255)
+                                ->unique(Record::class, 'email', ignoreRecord: true)
+                                ->dehydrated()
+                                ->regex('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/')
+                                ->columnSpan(2),
+
+                            PhoneInput::make('mobile_number')
+                                ->label(__('form.mobile_number'))
+                                ->excludeCountries(['IL'])
+                                ->validateFor($country = 'AUTO', $type = null, false)
+                                ->columnSpan(2),
+
+                            // Row 3: Country | City
+                            Select::make('country')
+                                ->live()
+                                ->label(__('form.country'))
+                                ->relationship('countryRelation', 'name')
+                                ->searchable()
+                                ->columnSpan(2)
+                                ->preload(),
+
+                            Select::make('city')
+                                ->label(__('form.city'))
+                                ->options(function (Get $get): Collection {
+                                    $countryId = $get('country');
+
+                                    if (!$countryId) {
+                                        return collect();
+                                    }
+
+                                    return State::query()
+                                        ->where('country_id', $countryId)
+                                        ->pluck('name', 'id');
+                                })
+                                ->searchable()
+                                ->columnSpan(2)
+                                ->preload(),
+
+                            // Row 4: Job Title | Company | Website
+                            TextInput::make('company')
+                                ->label(__('form.company'))
+                                ->columnSpan(2)
+                                ->maxLength(255),
+
+                            TextInput::make('job_title')
+                                ->label(__('form.job_title'))
+                                ->maxLength(255),
+
+                            TextInput::make('website')
+                                ->label(__('form.website'))
+                                ->maxLength(255),
+
+                            // Row 5: Phone Numbers (Repeater)
+                            Repeater::make('phone')
+                                ->label(__('form.phone_numbers'))
+                                ->schema([
+                                    TextInput::make('number')
+                                        ->label(__('form.phone_number'))
+                                        ->tel()
+                                        ->maxLength(255),
+                                ])
+                                ->orderable('number')
+                                ->defaultItems(1)
+                                ->columnSpanFull(),
+                        ]),
+                ])
+            ])->columns(1);
     }
+
 
     public static function getRelations(): array
     {
@@ -426,5 +406,16 @@ class RecordResource extends Resource
             'create' => Pages\CreateRecord::route('/create'),
             'edit' => Pages\EditRecord::route('/{record}/edit'),
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.record');
+    }
+
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.records');
     }
 }

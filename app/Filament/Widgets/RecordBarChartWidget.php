@@ -16,7 +16,7 @@ class RecordBarChartWidget extends ChartWidget
         return [
             'all' => 'All',
             'classification' => 'Classification',
-            'badge' => 'Badge',
+            'resource' => 'Resource',
             'sector' => 'Sector',
             'subsector' => 'Sub-sector',
         ];
@@ -41,12 +41,12 @@ class RecordBarChartWidget extends ChartWidget
             $counts = array_merge($counts, array_values($classificationCounts));
         }
 
-        if ($filter === 'all' || $filter === 'badge') {
+        if ($filter === 'all' || $filter === 'resource') {
             $badgeCounts = Record::query()
-                ->selectRaw('badge, COUNT(*) as count')
-                ->whereNotNull('badge')
-                ->groupBy('badge')
-                ->pluck('count', 'badge')
+                ->selectRaw('resource, COUNT(*) as count')
+                ->whereNotNull('resource')
+                ->groupBy('resource')
+                ->pluck('count', 'resource')
                 ->toArray();
 
             $categories = array_merge($categories, array_keys($badgeCounts));
@@ -85,6 +85,28 @@ class RecordBarChartWidget extends ChartWidget
                 ],
             ],
             'labels' => $categories,
+        ];
+    }
+
+    // Add the getOptions() method to enable hover over labels
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+
+            'plugins' => [
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+            'interaction' => [
+                'mode' => 'nearest',
+                'intersect' => false,
+            ],
+            'hover' => [
+                'mode' => 'nearest',
+                'intersect' => true,
+            ],
         ];
     }
 

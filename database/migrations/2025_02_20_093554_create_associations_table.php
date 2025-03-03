@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('other_info')->nullable();
-            $table->enum('type', ['classification', 'badge', 'sector', 'sub_sector'])->default('classification');
+            $table->enum('type', ['classification', 'resource', 'sector', 'sub_sector'])->default('classification');
             $table->timestamps();
         });
     }

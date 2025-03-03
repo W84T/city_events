@@ -17,12 +17,12 @@ class RecordExporter extends Exporter
             ExportColumn::make('id')
                 ->label('ID'),
             ExportColumn::make('classification'),
-            ExportColumn::make('badge'),
+            ExportColumn::make('source'),
             ExportColumn::make('sector'),
             ExportColumn::make('subsector'),
-            ExportColumn::make('title'),
-            ExportColumn::make('first_name'),
-            ExportColumn::make('last_name'),
+//            ExportColumn::make('title'),
+//            ExportColumn::make('first_name'),
+//            ExportColumn::make('last_name'),
             ExportColumn::make('full_name'),
             ExportColumn::make('email'),
             ExportColumn::make('mobile_number'),
@@ -37,8 +37,6 @@ class RecordExporter extends Exporter
             ExportColumn::make('company'),
             ExportColumn::make('job_title'),
             ExportColumn::make('website'),
-            ExportColumn::make('scfhs'),
-            ExportColumn::make('other_information'),
         ];
     }
 

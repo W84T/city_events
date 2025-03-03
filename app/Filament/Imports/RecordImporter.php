@@ -20,8 +20,6 @@ class RecordImporter extends Importer
         return [
             ImportColumn::make('classification')
                 ->requiredMapping(),
-            ImportColumn::make('badge')
-                ->requiredMapping(),
             ImportColumn::make('sector')
                 ->requiredMapping(),
             ImportColumn::make('subsector')
@@ -38,7 +36,7 @@ class RecordImporter extends Importer
                 ->requiredMapping(),
             ImportColumn::make('email')
                 ->rules([
-                    'required',
+                    'nullable',
                     'email',
                     'unique:records,email',
                     'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
@@ -47,6 +45,7 @@ class RecordImporter extends Importer
 
             ImportColumn::make('mobile_number')
                 ->rules([
+                    'nullable',
                     new Phone(),
                     'unique:records,mobile_number',
                 ])
@@ -59,11 +58,7 @@ class RecordImporter extends Importer
                 ->requiredMapping(),
             ImportColumn::make('website')
                 ->requiredMapping(),
-            ImportColumn::make('scfhs')
-                ->requiredMapping(),
             ImportColumn::make('phone')
-                ->requiredMapping(),
-            ImportColumn::make('other_information')
                 ->requiredMapping(),
         ];
     }
@@ -81,36 +76,40 @@ class RecordImporter extends Importer
 
     public function resolveRecord(): ?Record
     {
-        // Fetch the country ID based on the country name
-        $country = Country::where('name', $this->data['country'])->first();
-        if ($country) {
-            $this->data['country'] = $country->id;
-        } else {
-            // Handle the case where the country does not exist
-            $this->data['country'] = null; // or set a default country ID
+        // Ignore "Select" value for title
+        if (isset($this->data['title']) && strtolower($this->data['title']) === 'select') {
+            $this->data['title'] = null;
         }
 
-        // Fetch the state ID based on the city name
-        $state = State::where('name', $this->data['city'])->first();
-        if ($state) {
-            $this->data['city'] = $state->id;
+        // Fetch the country ID based on the code first, then name
+        $country = Country::where('code', $this->data['country'])->first();
+
+        if (!$country) {
+            $country = Country::where('name', $this->data['country'])->first();
+        }
+
+        if ($country) {
+            $this->data['country'] = $country->id;
+
+            // Fetch the state ID based on the city name
+            $state = State::where('name', $this->data['city'])->first();
+            $this->data['city'] = $state ? $state->id : null;
         } else {
-            // Handle the case where the state does not exist
-            $this->data['city'] = null; // or set a default state ID
+            // If no country is found, set both country and city to null
+            $this->data['country'] = null;
+            $this->data['city'] = null;
         }
 
         $this->data['classification'] = $this->resolveAssociationId($this->data['classification'], 'classification');
-        $this->data['badge'] = $this->resolveAssociationId($this->data['badge'], 'badge');
         $this->data['sector'] = $this->resolveAssociationId($this->data['sector'], 'sector');
         $this->data['subsector'] = $this->resolveAssociationId($this->data['subsector'], 'sub_sector');
 
+        // Convert scientific notation in mobile_number
         if (!empty($this->data['mobile_number'])) {
-            // Convert scientific notation to a regular number (e.g., 3.90523E+11 to 390523000000)
             if (stripos($this->data['mobile_number'], 'E') !== false) {
                 $this->data['mobile_number'] = sprintf('%.0f', (float) $this->data['mobile_number']);
             }
 
-            // Ensure the mobile number starts with a '+'
             if (!str_starts_with($this->data['mobile_number'], '+')) {
                 $this->data['mobile_number'] = '+' . $this->data['mobile_number'];
             }
@@ -118,19 +117,40 @@ class RecordImporter extends Importer
 
         // Convert phone numbers into array format
         if (!empty($this->data['phone'])) {
-            // Split numbers by comma or space if multiple numbers exist
             $numbers = preg_split('/[\s,]+/', $this->data['phone']);
 
-            // Convert to the required array format
+            if (count($numbers) === 1 && empty($this->data['mobile_number'])) {
+                $phoneNumber = trim($numbers[0]);
+
+                if (stripos($phoneNumber, 'E') !== false) {
+                    $phoneNumber = sprintf('%.0f', (float) $phoneNumber);
+                }
+
+                if (!str_starts_with($phoneNumber, '+')) {
+                    $phoneNumber = '+' . $phoneNumber;
+                }
+
+                if (\Illuminate\Support\Facades\Validator::make(
+                    ['phone' => $phoneNumber],
+                    ['phone' => ['required', new Phone()]]
+                )->passes()) {
+                    $this->data['mobile_number'] = $phoneNumber;
+                }
+            }
+
             $this->data['phone'] = array_map(fn($num) => ['number' => trim($num)], $numbers);
         }
 
+        if (empty($this->data['email'])) {
+            return new Record();
+        }
 
-        // Create or update the record
         return Record::firstOrNew([
             'email' => $this->data['email'],
         ]);
     }
+
+
 
     /**
      * Resolve the association ID based on the name and type.
@@ -141,7 +161,8 @@ class RecordImporter extends Importer
      */
     protected function resolveAssociationId($name, string $type)
     {
-        if (empty($name)) {
+
+        if (empty($name) || strtolower($name) === 'select') {
             return null;
         }
 

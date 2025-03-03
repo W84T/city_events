@@ -27,4 +27,6 @@ return [
     'type' => 'Type',
     'full_name' => 'Full Name',
     'gender' => 'Gender',
+    'company' => 'Company',
+    'resource' => 'Resource',
 ];

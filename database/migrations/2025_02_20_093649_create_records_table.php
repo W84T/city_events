@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('records', function (Blueprint $table) {
             $table->id();
             $table->string('classification')->nullable();
-            $table->string('badge')->nullable();
+            $table->string('resource')->nullable();
             $table->string('sector')->nullable();
             $table->string('subsector')->nullable();
             $table->text('title')->nullable();
-                $table->string('first_name')->nullable();
+            $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('email')->nullable();
             $table->string('mobile_number')->nullable();
@@ -29,8 +29,6 @@ return new class extends Migration
             $table->string('company')->nullable();
             $table->string('job_title')->nullable();
             $table->string('website')->nullable();
-            $table->text('scfhs')->nullable();
-            $table->text('other_information')->nullable();
             $table->timestamps();
         });
     }

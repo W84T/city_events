@@ -34,7 +34,7 @@ class AssociationResource extends Resource
                             ->searchable()
                             ->options([
                                 'classification' => __('form.classification'),
-                                'badge' => __('form.badge'),
+                                'resource' => __('form.resource'),
                                 'sector' => __('form.sector'),
                                 'sub_sector' => __('form.subSector'),
                             ])
@@ -57,27 +57,37 @@ class AssociationResource extends Resource
 
     public static function table(Table $table): Table
     {
-            return $table
-                ->columns([
-                    Tables\Columns\TextColumn::make('name')
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('other_info')
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('type')->sortable()->searchable(),
-                    Tables\Columns\TextColumn::make('created_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('updated_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])->defaultGroup(Tables\Grouping\Group::make('type')->collapsible())
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('form.name'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('other_info')
+                    ->label(__('form.other_info'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('type')
+                    ->label(__('form.type'))
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultGroup(
+                Tables\Grouping\Group::make('type')
+                    ->label(__('form.type'))
+                    ->collapsible()
+            )
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
                     ->options([
                         'classification' => __('form.classification'),
-                        'badge' => __('form.badge'),
+                        'resource' => __('form.resource'),
                         'sector' => __('form.sector'),
                         'sub_sector' => __('form.subSector'),
                     ])
@@ -106,5 +116,16 @@ class AssociationResource extends Resource
             'create' => Pages\CreateAssociation::route('/create'),
             'edit' => Pages\EditAssociation::route('/{record}/edit'),
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.association');
+    }
+
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.associations');
     }
 }
