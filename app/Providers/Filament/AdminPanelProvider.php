@@ -31,8 +31,8 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->profile()
             ->brandName('City Events')
-            ->brandLogo(asset('/logo.svg'))
-            ->darkModeBrandLogo(asset('/logo_white.svg'))
+            ->brandLogo(asset('storage/logo.svg'))
+            ->darkModeBrandLogo(asset('storage/logo_white.svg'))
             ->brandLogoHeight('4rem')
             ->colors([
                 'primary' => [
