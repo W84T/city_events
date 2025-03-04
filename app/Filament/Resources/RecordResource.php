@@ -214,12 +214,12 @@ class RecordResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(RecordExporter::class)
-                    ->icon('heroicon-o-arrow-down-tray')
+                    ->icon('heroicon-o-arrow-up-tray')
                     ->color('primary'),
                 ImportAction::make()
                     ->importer(RecordImporter::class)
-                    ->icon('heroicon-o-arrow-up-tray') // Add an icon for import
-                    ->color('primary'), // Set the color to primary
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('primary'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
