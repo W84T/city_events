@@ -12,7 +12,7 @@ use App\Filament\Resources\RecordResource\Pages;
 use App\Filament\Resources\RecordResource\RelationManagers;
 use App\Models\Association;
 use App\Models\Record;
-use App\Models\state;
+use App\Models\State;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Radio;
