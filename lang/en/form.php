@@ -29,4 +29,5 @@ return [
     'gender' => 'Gender',
     'company' => 'Company',
     'resource' => 'Resource',
+    'exhibition' => 'Exhibition Name',
 ];

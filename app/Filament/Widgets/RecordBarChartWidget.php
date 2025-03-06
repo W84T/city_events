@@ -15,10 +15,10 @@ class RecordBarChartWidget extends ChartWidget
     {
         return [
             'all' => 'All',
-            'classification' => 'Classification',
+            'exhibition' => 'exhibition',
             'resource' => 'Resource',
             'sector' => 'Sector',
-            'subsector' => 'Sub-sector',
+
         ];
     }
 
@@ -29,12 +29,12 @@ class RecordBarChartWidget extends ChartWidget
         $categories = [];
         $counts = [];
 
-        if ($filter === 'all' || $filter === 'classification') {
+        if ($filter === 'all' || $filter === 'exhibition') {
             $classificationCounts = Record::query()
-                ->selectRaw('classification, COUNT(*) as count')
-                ->whereNotNull('classification')
-                ->groupBy('classification')
-                ->pluck('count', 'classification')
+                ->selectRaw('exhibition, COUNT(*) as count')
+                ->whereNotNull('exhibition')
+                ->groupBy('exhibition')
+                ->pluck('count', 'exhibition')
                 ->toArray();
 
             $categories = array_merge($categories, array_keys($classificationCounts));
@@ -65,17 +65,6 @@ class RecordBarChartWidget extends ChartWidget
             $counts = array_merge($counts, array_values($sectorCounts));
         }
 
-        if ($filter === 'all' || $filter === 'subsector') {
-            $subsectorCounts = Record::query()
-                ->selectRaw('subsector, COUNT(*) as count')
-                ->whereNotNull('subsector')
-                ->groupBy('subsector')
-                ->pluck('count', 'subsector')
-                ->toArray();
-
-            $categories = array_merge($categories, array_keys($subsectorCounts));
-            $counts = array_merge($counts, array_values($subsectorCounts));
-        }
 
         return [
             'datasets' => [

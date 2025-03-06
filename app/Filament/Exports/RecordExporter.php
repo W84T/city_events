@@ -16,10 +16,9 @@ class RecordExporter extends Exporter
         return [
             ExportColumn::make('id')
                 ->label('ID'),
-            ExportColumn::make('classification'),
+            ExportColumn::make('exhibition'),
             ExportColumn::make('source'),
             ExportColumn::make('sector'),
-            ExportColumn::make('subsector'),
 //            ExportColumn::make('title'),
 //            ExportColumn::make('first_name'),
 //            ExportColumn::make('last_name'),

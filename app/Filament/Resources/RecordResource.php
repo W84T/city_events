@@ -14,20 +14,15 @@ use App\Models\Association;
 use App\Models\Record;
 use App\Models\State;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\ImportAction;
@@ -36,7 +31,6 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Mail;
 use Webbingbrasil\FilamentAdvancedFilter\Filters\TextFilter;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
@@ -52,8 +46,8 @@ class RecordResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('classification')
-                    ->label(__('form.classification'))
+                TextColumn::make('exhibition')
+                    ->label(__('form.exhibition'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -64,11 +58,6 @@ class RecordResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sector')
                     ->label(__('form.sector'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('subsector')
-                    ->label(__('form.subSector'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -236,22 +225,22 @@ class RecordResource extends Resource
             ->schema([
                 Group::make()->schema([
                     Section::make(__('form.association'))
-                        ->columns(4) // Four columns for better layout
+                        ->columns(3) // Four columns for better layout
                         ->schema([
-                            Select::make('classification')
+                            Select::make('exhibition')
                                 ->searchable()
                                 ->preload()
-                                ->label(__('form.classification'))
-                                ->options(Association::where('type', 'classification')->pluck('name', 'name'))
+                                ->label(__('form.exhibition'))
+                                ->options(Association::where('type', 'exhibition')->pluck('name', 'name'))
                                 ->createOptionForm([
                                     TextInput::make('name')->label(__('form.name'))->maxLength(255),
                                     TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
-                                    TextInput::make('type')->hidden()->default('classification'),
+                                    TextInput::make('type')->hidden()->default('exhibition'),
                                 ])
-                                ->createOptionUsing(fn ($data) => Association::create([
+                                ->createOptionUsing(fn($data) => Association::create([
                                     'name' => $data['name'],
                                     'other_info' => $data['other_info'] ?? null,
-                                    'type' => 'classification',
+                                    'type' => 'exhibition',
                                 ])->name),
 
                             Select::make('resource')
@@ -264,7 +253,7 @@ class RecordResource extends Resource
                                     TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
                                     TextInput::make('type')->hidden()->default('resource'),
                                 ])
-                                ->createOptionUsing(fn ($data) => Association::create([
+                                ->createOptionUsing(fn($data) => Association::create([
                                     'name' => $data['name'],
                                     'other_info' => $data['other_info'] ?? null,
                                     'type' => 'resource',
@@ -280,26 +269,10 @@ class RecordResource extends Resource
                                     TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
                                     TextInput::make('type')->hidden()->default('sector'),
                                 ])
-                                ->createOptionUsing(fn ($data) => Association::create([
+                                ->createOptionUsing(fn($data) => Association::create([
                                     'name' => $data['name'],
                                     'other_info' => $data['other_info'] ?? null,
                                     'type' => 'sector',
-                                ])->name),
-
-                            Select::make('subsector')
-                                ->searchable()
-                                ->preload()
-                                ->label(__('form.subSector'))
-                                ->options(Association::where('type', 'sub_sector')->pluck('name', 'name'))
-                                ->createOptionForm([
-                                    TextInput::make('name')->label(__('form.name'))->maxLength(255),
-                                    TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
-                                    TextInput::make('type')->hidden()->default('sub_sector'),
-                                ])
-                                ->createOptionUsing(fn ($data) => Association::create([
-                                    'name' => $data['name'],
-                                    'other_info' => $data['other_info'] ?? null,
-                                    'type' => 'sub_sector',
                                 ])->name),
                         ]),
                     Section::make(__('form.information'))
@@ -322,7 +295,7 @@ class RecordResource extends Resource
                                 ]),
 
 
-        TextInput::make('first_name')
+                            TextInput::make('first_name')
                                 ->label(__('form.first_name'))
                                 ->maxLength(255),
 

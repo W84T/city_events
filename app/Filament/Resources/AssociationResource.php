@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AssociationResource\Pages;
 use App\Filament\Resources\AssociationResource\RelationManagers;
 use App\Models\Association;
-use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -14,8 +13,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AssociationResource extends Resource
 {
@@ -33,10 +30,9 @@ class AssociationResource extends Resource
                             ->label(__('form.type'))
                             ->searchable()
                             ->options([
-                                'classification' => __('form.classification'),
+                                'exhibition' => __('form.exhibition'),
                                 'resource' => __('form.resource'),
                                 'sector' => __('form.sector'),
-                                'sub_sector' => __('form.subSector'),
                             ])
                     ]),
                 ])->columnSpan(1),
@@ -86,10 +82,9 @@ class AssociationResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
                     ->options([
-                        'classification' => __('form.classification'),
+                        'exhibition' => __('form.exhibition'),
                         'resource' => __('form.resource'),
                         'sector' => __('form.sector'),
-                        'sub_sector' => __('form.subSector'),
                     ])
             ])
             ->actions([

@@ -18,11 +18,7 @@ class RecordImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('classification')
-                ->requiredMapping(),
             ImportColumn::make('sector')
-                ->requiredMapping(),
-            ImportColumn::make('subsector')
                 ->requiredMapping(),
             ImportColumn::make('title')
                 ->requiredMapping(),
@@ -99,10 +95,8 @@ class RecordImporter extends Importer
             $this->data['country'] = null;
             $this->data['city'] = null;
         }
-
-        $this->data['classification'] = $this->resolveAssociationId($this->data['classification'], 'classification');
+        
         $this->data['sector'] = $this->resolveAssociationId($this->data['sector'], 'sector');
-        $this->data['subsector'] = $this->resolveAssociationId($this->data['subsector'], 'sub_sector');
 
         // Convert scientific notation in mobile_number
         if (!empty($this->data['mobile_number'])) {
