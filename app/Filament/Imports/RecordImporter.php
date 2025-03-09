@@ -20,6 +20,10 @@ class RecordImporter extends Importer
         return [
             ImportColumn::make('sector')
                 ->requiredMapping(),
+            ImportColumn::make('resource')
+                ->requiredMapping(),
+            ImportColumn::make('exhibition')
+                ->requiredMapping(),
             ImportColumn::make('title')
                 ->requiredMapping(),
             ImportColumn::make('first_name')
@@ -95,8 +99,10 @@ class RecordImporter extends Importer
             $this->data['country'] = null;
             $this->data['city'] = null;
         }
-        
+
         $this->data['sector'] = $this->resolveAssociationId($this->data['sector'], 'sector');
+        $this->data['resource'] = $this->resolveAssociationId($this->data['resource'], 'resource');
+        $this->data['exhibition'] = $this->resolveAssociationId($this->data['exhibition'], 'exhibition');
 
         // Convert scientific notation in mobile_number
         if (!empty($this->data['mobile_number'])) {
