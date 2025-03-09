@@ -48,6 +48,7 @@ class RecordImporter extends Importer
                     'nullable',
                     new Phone(),
                     'unique:records,mobile_number',
+                    'not_regex:/^\+800/',
                 ])
                 ->requiredMapping(),
             ImportColumn::make('country')
