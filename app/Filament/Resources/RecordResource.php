@@ -71,15 +71,16 @@ class RecordResource extends Resource
 
                 TextColumn::make('full_name')
                     ->label(__('form.full_name'))
-                    ->sortable(query: fn($query, $direction) => $query->orderByRaw("CONCAT(first_name, ' ', last_name) {$direction}")
-                    )
-                    ->searchable(query: fn($query, $search) => $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
-                    ),
+                    ->toggleable()
+                    ->sortable(query: fn($query, $direction) => $query->orderByRaw("CONCAT(first_name, ' ', last_name) {$direction}"))
+                    ->searchable(query: fn($query, $search) => $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])),
                 TextColumn::make('gender')
                     ->label(__('form.gender'))
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('email')
                     ->copyable()
+                    ->toggleable()
                     ->copyMessage(__('Email copied'))
                     ->label(__('form.email'))
                     ->searchable()
@@ -87,11 +88,13 @@ class RecordResource extends Resource
                 PhoneColumn::make('mobile_number')->displayFormat(PhoneInputNumberType::NATIONAL)
                     ->searchable()
                     ->copyable()
+                    ->toggleable()
                     ->copyMessage('mobile number copied')
                     ->sortable(),
                 TextColumn::make('countryRelation.name')
                     ->label(__('form.country'))
                     ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('stateRelation.name')
                     ->label(__('form.city'))
@@ -100,6 +103,7 @@ class RecordResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('company')
                     ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('title')
                     ->label(__('form.title'))
