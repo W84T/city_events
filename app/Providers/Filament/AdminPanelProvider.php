@@ -2,12 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\RecordResource;
 use App\Filament\Widgets\RecordBarChartWidget;
 use App\Filament\Widgets\RecordStatisticsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -28,11 +30,26 @@ class AdminPanelProvider extends PanelProvider
             ->path('')
             ->databaseNotifications()
             ->sidebarCollapsibleOnDesktop()
+
             ->login()
             ->profile()
             ->brandName('City Events')
             ->brandLogo(asset('storage/logo.svg'))
             ->darkModeBrandLogo(asset('storage/logo_white.svg'))
+            ->navigationItems([
+                NavigationItem::make('Add Record')
+                    ->icon('heroicon-o-plus-circle')
+                    ->activeIcon('heroicon-s-plus-circle')
+                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.records.create'))
+                    ->sort(1)
+                    ->url(fn () => RecordResource::getUrl('create')),
+                NavigationItem::make('Dashboard')
+                    ->icon('heroicon-o-home')
+                    ->activeIcon('heroicon-s-home')
+                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.dashboard'))
+                    ->sort(3)
+                    ->url(fn () => Pages\Dashboard::getUrl()),
+            ])
             ->brandLogoHeight('4rem')
             ->colors([
                 'primary' => [

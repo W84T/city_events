@@ -21,6 +21,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
@@ -36,31 +37,38 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
 
-class RecordResource extends Resource
-{
-    protected static ?string $model = Record::class;
 
+class RecordResource extends Resource
+
+{
+
+    protected static ?string $model = Record::class;
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-table-cells';
+    protected static ?int $navigationSort = 0;
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('exhibition')
-                    ->label(__('form.exhibition'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('resource')
-                    ->label(__('form.resource'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sector')
                     ->label(__('form.sector'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('resource')
+                    ->label(__('form.resource'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('exhibition')
+                    ->label(__('form.exhibition'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('full_name')
                     ->label(__('form.full_name'))
                     ->sortable(query: fn($query, $direction) => $query->orderByRaw("CONCAT(first_name, ' ', last_name) {$direction}")
@@ -410,4 +418,20 @@ class RecordResource extends Resource
     {
         return __('panel.records');
     }
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            NavigationItem::make()
+                ->label(__('Records'))
+                ->icon(static::getNavigationIcon())
+                ->url(static::getUrl('index'))
+                ->isActiveWhen(fn() => request()->routeIs([
+                    'filament.admin.resources.records.index',
+                    'filament.admin.resources.records.edit',
+                ])),
+        ];
+    }
+
+
 }

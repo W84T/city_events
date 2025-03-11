@@ -6,6 +6,10 @@ use App\Models\Record;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use OpenSpout\Common\Entity\Style\CellAlignment;
+use OpenSpout\Common\Entity\Style\CellVerticalAlignment;
+use OpenSpout\Common\Entity\Style\Color;
+use OpenSpout\Common\Entity\Style\Style;
 
 class RecordExporter extends Exporter
 {
@@ -14,11 +18,11 @@ class RecordExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('id')
-                ->label('ID'),
-            ExportColumn::make('exhibition'),
-            ExportColumn::make('source'),
+//            ExportColumn::make('id')
+//                ->label('ID'),
             ExportColumn::make('sector'),
+            ExportColumn::make('source'),
+            ExportColumn::make('exhibition'),
 //            ExportColumn::make('title'),
 //            ExportColumn::make('first_name'),
 //            ExportColumn::make('last_name'),
@@ -49,4 +53,5 @@ class RecordExporter extends Exporter
 
         return $body;
     }
+
 }
