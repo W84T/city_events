@@ -21,7 +21,7 @@ class RecordExporter extends Exporter
 //            ExportColumn::make('id')
 //                ->label('ID'),
             ExportColumn::make('sector'),
-            ExportColumn::make('source'),
+            ExportColumn::make('resource'),
             ExportColumn::make('exhibition'),
 //            ExportColumn::make('title'),
 //            ExportColumn::make('first_name'),
