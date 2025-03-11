@@ -112,6 +112,8 @@ class RecordImporter extends Importer
         if (!empty($this->data['phone'])) {
             $numbers = preg_split('/[\s,]+/', $this->data['phone']);
 
+            $numbers = preg_split('/[\s,]+/', $this->data['phone']);
+
             if (count($numbers) === 1 && empty($this->data['mobile_number'])) {
                 $phoneNumber = trim($numbers[0]);
 
@@ -128,9 +130,10 @@ class RecordImporter extends Importer
                     ['phone' => ['required', new Phone()]]
                 )->passes()) {
                     $this->data['mobile_number'] = $phoneNumber;
-                    $this->data['phone'] = null; // Ensure phone is set to null
+                    $this->data['phone'] = null;
                 }
-            } elseif (!empty($this->data['mobile_number'])) {
+            }
+            elseif (!empty($this->data['mobile_number'])) {
                 // If mobile number exists, check if phone contains only numeric values
                 $validPhones = array_filter($numbers, fn($num) => preg_match('/^\d+$/', trim($num)));
 
