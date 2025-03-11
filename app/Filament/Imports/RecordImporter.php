@@ -82,20 +82,14 @@ class RecordImporter extends Importer
         }
 
         // Fetch the country ID based on the code first, then name
-        $country = Country::where('code', $this->data['country'])->first();
-
-        if (!$country) {
-            $country = Country::where('name', $this->data['country'])->first();
-        }
+        $country = Country::where('code', $this->data['country'])->first()
+            ?? Country::where('name', $this->data['country'])->first();
 
         if ($country) {
             $this->data['country'] = $country->id;
-
-            // Fetch the state ID based on the city name
             $state = State::where('name', $this->data['city'])->first();
             $this->data['city'] = $state ? $state->id : null;
         } else {
-            // If no country is found, set both country and city to null
             $this->data['country'] = null;
             $this->data['city'] = null;
         }
@@ -109,13 +103,12 @@ class RecordImporter extends Importer
             if (stripos($this->data['mobile_number'], 'E') !== false) {
                 $this->data['mobile_number'] = sprintf('%.0f', (float) $this->data['mobile_number']);
             }
-
             if (!str_starts_with($this->data['mobile_number'], '+')) {
                 $this->data['mobile_number'] = '+' . $this->data['mobile_number'];
             }
         }
 
-        // Convert phone numbers into array format
+        // Process phone numbers
         if (!empty($this->data['phone'])) {
             $numbers = preg_split('/[\s,]+/', $this->data['phone']);
 
@@ -135,20 +128,23 @@ class RecordImporter extends Importer
                     ['phone' => ['required', new Phone()]]
                 )->passes()) {
                     $this->data['mobile_number'] = $phoneNumber;
+                    $this->data['phone'] = null; // Ensure phone is set to null
                 }
+            } elseif (!empty($this->data['mobile_number'])) {
+                // If mobile number exists, check if phone contains only numeric values
+                $validPhones = array_filter($numbers, fn($num) => preg_match('/^\d+$/', trim($num)));
+
+                $this->data['phone'] = !empty($validPhones)
+                    ? array_map(fn($num) => ['number' => trim($num)], $validPhones)
+                    : null;
             }
-
-            $this->data['phone'] = array_map(fn($num) => ['number' => trim($num)], $numbers);
+        } else {
+            $this->data['phone'] = null;
         }
 
-        if (empty($this->data['email'])) {
-            return new Record();
-        }
-
-        return Record::firstOrNew([
-            'email' => $this->data['email'],
-        ]);
+        return empty($this->data['email']) ? new Record() : Record::firstOrNew(['email' => $this->data['email']]);
     }
+
 
 
 
