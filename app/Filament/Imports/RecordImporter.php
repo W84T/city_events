@@ -9,6 +9,7 @@ use App\Models\State;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Validator;
 use Propaganistas\LaravelPhone\Rules\Phone;
 
 class RecordImporter extends Importer
@@ -101,7 +102,7 @@ class RecordImporter extends Importer
         // Convert scientific notation in mobile_number
         if (!empty($this->data['mobile_number'])) {
             if (stripos($this->data['mobile_number'], 'E') !== false) {
-                $this->data['mobile_number'] = sprintf('%.0f', (float) $this->data['mobile_number']);
+                $this->data['mobile_number'] = sprintf('%.0f', (float)$this->data['mobile_number']);
             }
             if (!str_starts_with($this->data['mobile_number'], '+')) {
                 $this->data['mobile_number'] = '+' . $this->data['mobile_number'];
@@ -110,45 +111,46 @@ class RecordImporter extends Importer
 
         // Process phone numbers
         if (!empty($this->data['phone'])) {
-            $numbers = preg_split('/[\s,]+/', $this->data['phone']);
+            // Split phone numbers by commas ONLY
+            $numbers = preg_split('/,\s*/', $this->data['phone']);
 
-            $numbers = preg_split('/[\s,]+/', $this->data['phone']);
+            // Validate each number format
+            $validPhones = array_filter($numbers, function ($num) {
+                $num = trim($num);
+                return preg_match('/^\+?\d[\d\s\-()]*$/', $num); // Allow valid formats
+            });
 
-            if (count($numbers) === 1 && empty($this->data['mobile_number'])) {
-                $phoneNumber = trim($numbers[0]);
+            // If mobile_number is empty, assign the first valid phone number to it
+            if (empty($this->data['mobile_number']) && !empty($validPhones)) {
+                $firstValidPhone = array_shift($validPhones); // Get and remove the first valid phone
 
-                if (stripos($phoneNumber, 'E') !== false) {
-                    $phoneNumber = sprintf('%.0f', (float) $phoneNumber);
+                // Convert scientific notation (e.g., 5.0E+12)
+                if (stripos($firstValidPhone, 'E') !== false) {
+                    $firstValidPhone = sprintf('%.0f', (float)$firstValidPhone);
                 }
 
-                if (!str_starts_with($phoneNumber, '+')) {
-                    $phoneNumber = '+' . $phoneNumber;
+                // Ensure it starts with "+"
+                if (!str_starts_with($firstValidPhone, '+')) {
+                    $firstValidPhone = '+' . $firstValidPhone;
                 }
 
-                if (\Illuminate\Support\Facades\Validator::make(
-                    ['phone' => $phoneNumber],
-                    ['phone' => ['required', new Phone()]]
-                )->passes()) {
-                    $this->data['mobile_number'] = $phoneNumber;
-                    $this->data['phone'] = null;
+                // Validate with LaravelPhone
+                if (Validator::make(['phone' => $firstValidPhone], ['phone' => ['required', new Phone()]])->passes()) {
+                    $this->data['mobile_number'] = $firstValidPhone;
                 }
             }
-            elseif (!empty($this->data['mobile_number'])) {
-                // If mobile number exists, check if phone contains only numeric values
-                $validPhones = array_filter($numbers, fn($num) => preg_match('/^\d+$/', trim($num)));
 
-                $this->data['phone'] = !empty($validPhones)
-                    ? array_map(fn($num) => ['number' => trim($num)], $validPhones)
-                    : null;
-            }
+            // Store the remaining valid numbers in phone as an array of ['number' => value]
+            $this->data['phone'] = !empty($validPhones)
+                ? array_map(fn($num) => ['number' => trim($num)], $validPhones)
+                : null;
+
         } else {
             $this->data['phone'] = null;
         }
 
         return empty($this->data['email']) ? new Record() : Record::firstOrNew(['email' => $this->data['email']]);
     }
-
-
 
 
     /**
