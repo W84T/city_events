@@ -322,22 +322,23 @@ class RecordResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Define your SelectFilters and TextFilters here
-                SelectFilter::make('classification')
-                    ->label(__('form.classification'))
-                    ->searchable()
-                    ->options(Association::where('type', 'classification')->pluck('name', 'name'))
-                    ->preload(),
-                SelectFilter::make('resource')
-                    ->label(__('form.resource'))
-                    ->searchable()
-                    ->options(Association::where('type', 'resource')->pluck('name', 'name'))
-                    ->preload(),
                 SelectFilter::make('sector')
                     ->label(__('form.sector'))
                     ->searchable()
                     ->options(Association::where('type', 'sector')->pluck('name', 'name'))
                     ->preload(),
+
+                SelectFilter::make('resource')
+                    ->label(__('form.resource'))
+                    ->searchable()
+                    ->options(Association::where('type', 'resource')->pluck('name', 'name'))
+                    ->preload(),
+                SelectFilter::make('exhibition')
+                    ->label(__('form.exhibition'))
+                    ->searchable()
+                    ->options(Association::where('type', 'exhibition')->pluck('name', 'name'))
+                    ->preload(),
+
                 SelectFilter::make('subSector')
                     ->label(__('form.subSector'))
                     ->searchable()
@@ -384,11 +385,10 @@ class RecordResource extends Resource
                     ->description()
                     ->schema([
                         Group::make([
-                            $filters['classification'],
-                            $filters['resource'],
                             $filters['sector'],
-                            $filters['subSector'],
-                        ])->columns(4),
+                            $filters['resource'],
+                            $filters['exhibition'],
+                        ])->columns(3),
                     ])
                     ->columns(1),
 
