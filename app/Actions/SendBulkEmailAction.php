@@ -20,27 +20,25 @@ class SendBulkEmailAction
             ->modalHeading('Compose Bulk Email')
             ->modalSubmitActionLabel('Send Emails')
             ->form([
+                \Filament\Forms\Components\Section::make(__('How to Use Placeholders'))
+                    ->collapsed()
+                    ->schema([
+                        \Filament\Forms\Components\MarkdownEditor::make('instructions')
+                            ->label(false)
+                            ->default("You can use the following placeholders in your email:\n\n" .
+                                "- **{title}** → Title\n" .
+                                "- **{first_name}** → First Name\n" .
+                                "- **{last_name}** → Last Name\n" .
+                                "- **{job_title}** → Job Title\n" .
+                                "- **{mobile_number}** → Mobile Number\n\n" .
+                                "These placeholders will be automatically replaced when sending emails.")
+                            ->disabled()
+                            ->columnSpanFull(),
+                    ]),
                 TextInput::make('subject')
                     ->label(__('Email Subject'))
                     ->maxLength(255)
                     ->required(),
-                Select::make('placeholder')
-                    ->label(__('Insert Placeholder'))
-                    ->options([
-                        '{first_name}' => 'First Name',
-                        '{last_name}' => 'Last Name',
-                        '{title}' => 'Title',
-                        '{job_title}' => 'Job Title',
-                        '{mobile_number}' => 'Mobile Number',
-                    ])
-                    ->reactive() // Make the field reactive
-                    ->afterStateUpdated(function ($state, $set, $get) {
-                        // Get the current email body
-                        $emailBody = $get('email_body');
-
-                        // Append the selected placeholder to the email body
-                        $set('email_body', $emailBody . ' ' . $state);
-                    }),
                 RichEditor::make('email_body')
                     ->label(__('Email Body'))
                     ->columnSpanFull()

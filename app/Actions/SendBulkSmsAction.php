@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Actions;
 
-use Filament\Tables\Actions\BulkAction;
-use Filament\Forms\Components\Textarea;
 use App\Services\MoraSMSService;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\BulkAction;
 
 class SendBulkSmsAction
 {
@@ -16,15 +18,24 @@ class SendBulkSmsAction
             ->modalHeading('Compose Bulk SMS')
             ->modalSubmitActionLabel('Next')
             ->form([
+                MarkdownEditor::make('instructions')
+                    ->label(__('Placeholder Instructions'))
+                    ->default("You can use the following placeholders in your email:\n\n" .
+                        "- **{title}** → Title\n" .
+                        "- **{first_name}** → First Name\n" .
+                        "- **{last_name}** → Last Name\n" .
+                        "- **{company}** → company\n" .
+                        "These placeholders will be automatically replaced when sending emails.")
+                    ->disabled()
+                    ->columnSpanFull(),
                 Textarea::make('message')
                     ->label('Message')
-                    ->helperText('Use placeholders: {first_name}, {last_name}, {title}, {company}')
                     ->required()
                     ->autosize()
                     ->columnSpanFull(),
             ])
             ->modalWidth('md')
-            ->action(fn ($records, array $data) => self::confirmAndSend($records, $data));
+            ->action(fn($records, array $data) => self::confirmAndSend($records, $data));
     }
 
     private static function confirmAndSend($records, $data)
@@ -45,7 +56,7 @@ class SendBulkSmsAction
             ->description(nl2br($messagePreview)) // Preview personalized messages
             ->icon('heroicon-o-check')
             ->modalSubmitActionLabel('Send SMS')
-            ->action(fn () => self::sendSms($records, $data['message']));
+            ->action(fn() => self::sendSms($records, $data['message']));
     }
 
     private static function sendSms($records, $messageTemplate)
