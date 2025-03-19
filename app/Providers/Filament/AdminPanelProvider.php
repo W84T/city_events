@@ -50,6 +50,7 @@ class AdminPanelProvider extends PanelProvider
                     ->sort(3)
                     ->url(fn () => Pages\Dashboard::getUrl()),
             ])
+            ->maxContentWidth('full')
             ->brandLogoHeight('4rem')
             ->colors([
                 'primary' => [
