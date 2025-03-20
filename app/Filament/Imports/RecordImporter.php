@@ -11,7 +11,7 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Validator;
 use Propaganistas\LaravelPhone\Rules\Phone;
-
+use Carbon\CarbonInterface;
 class RecordImporter extends Importer
 {
     protected static ?string $model = Record::class;
@@ -20,50 +20,77 @@ class RecordImporter extends Importer
     {
         return [
             ImportColumn::make('sector')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Sector', 'sector']),
+
             ImportColumn::make('resource')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Resource', 'resource']),
+
             ImportColumn::make('exhibition')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Exhibition', 'exhibition', 'Exhibition Name']),
+
             ImportColumn::make('title')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Title ', 'title', 'title']),
+
             ImportColumn::make('first_name')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['F Name ', 'first_name']),
+
             ImportColumn::make('last_name')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['L Name ', 'last_name']),
+
             ImportColumn::make('gender')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Gender', 'gender', 'Sex ']),
+
             ImportColumn::make('company')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Company ', 'company', 'Company']),
+
             ImportColumn::make('email')
+                ->requiredMapping()
                 ->rules([
                     'nullable',
                     'email',
                     'unique:records,email',
                     'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
                 ])
-                ->requiredMapping(),
+                ->guess(['Email ', 'email', 'Email']),
 
             ImportColumn::make('mobile_number')
+                ->requiredMapping()
                 ->rules([
                     'nullable',
                     new Phone(),
                     'unique:records,mobile_number',
                 ])
-                ->requiredMapping(),
+                ->guess(['Mobile ', 'mobile_number', 'Mobile Number']),
+
             ImportColumn::make('country')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Country ', 'country', 'Country']),
+
             ImportColumn::make('city')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['City ', 'city', 'City']),
+
             ImportColumn::make('job_title')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Job Title ', 'job_title', 'Job Title']),
+
             ImportColumn::make('website')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['WebSite ', 'website', 'Website']),
+
             ImportColumn::make('phone')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->guess(['Phone 1 ', 'phone']),
         ];
     }
-
     public static function getCompletedNotificationBody(Import $import): string
     {
         $body = 'Your record import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
@@ -77,6 +104,15 @@ class RecordImporter extends Importer
 
     public function resolveRecord(): ?Record
     {
+
+        $requiredFields = ['sector', 'resource', 'exhibition', 'title', 'first_name', 'last_name', 'email', 'mobile_number', 'country'];
+        $isEmptyRow = collect($requiredFields)->every(fn($field) => empty($this->data[$field]));
+
+        if ($isEmptyRow) {
+            return null;
+        }
+
+
         // Ignore "Select" value for title
         if (isset($this->data['title']) && strtolower($this->data['title']) === 'select') {
             $this->data['title'] = null;
@@ -182,5 +218,11 @@ class RecordImporter extends Importer
             return $newAssociation->name;
         }
 
+    }
+
+
+    public function getJobRetryUntil(): ?CarbonInterface
+    {
+        return now()->addMinute();
     }
 }

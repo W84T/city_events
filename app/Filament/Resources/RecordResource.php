@@ -252,8 +252,8 @@ class RecordResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('sector')
-                    ->label(__('form.sector'))
+                TextColumn::make('exhibition')
+                    ->label(__('form.exhibition'))
                     ->sortable()
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -264,8 +264,8 @@ class RecordResource extends Resource
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('exhibition')
-                    ->label(__('form.exhibition'))
+                TextColumn::make('sector')
+                    ->label(__('form.sector'))
                     ->sortable()
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -339,11 +339,6 @@ class RecordResource extends Resource
                     ->options(Association::where('type', 'exhibition')->pluck('name', 'name'))
                     ->preload(),
 
-                SelectFilter::make('subSector')
-                    ->label(__('form.subSector'))
-                    ->searchable()
-                    ->options(Association::where('type', 'sub_sector')->pluck('name', 'name'))
-                    ->preload(),
                 TextFilter::make('first_name')
                     ->default(TextFilter::CLAUSE_CONTAIN)
                     ->wrapperUsing(fn() => Group::make())
