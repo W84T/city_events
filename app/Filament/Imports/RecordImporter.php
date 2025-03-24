@@ -223,6 +223,6 @@ class RecordImporter extends Importer
 
     public function getJobRetryUntil(): ?CarbonInterface
     {
-        return now()->addMinute();
+        return now()->addMinutes(5);
     }
 }
