@@ -24,6 +24,7 @@ class ListRecords extends BaseListRecords
             ImportAction::make()
                 ->importer(RecordImporter::class)
                 ->icon('heroicon-o-arrow-down-tray')
+                ->chunkSize(20)
                 ->color('primary'),
         ];
     }

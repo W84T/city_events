@@ -8,7 +8,18 @@ use Filament\Widgets\ChartWidget;
 class SectorPieChartWidget extends ChartWidget
 {
     protected static ?string $heading = 'Sector Pie Chart';
-    protected int | string | array $columnSpan = '4';
+    protected int|string|array $columnSpan = '4';
+
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'scales' => [
+                'x' => ['display' => false], // Ensure X-axis is hidden
+                'y' => ['display' => false], // Ensure Y-axis is hidden
+            ],
+        ];
+    }
     protected function getData(): array
     {
         $count = Record::query()
@@ -18,7 +29,8 @@ class SectorPieChartWidget extends ChartWidget
             ->pluck('count', 'sector')
             ->toArray();
 
-        $backgroundColors = $this->generateConsistentColors(array_keys($count));
+        $backgroundColors = $this->assignColors(array_keys($count));
+
         return [
             'datasets' => [
                 [
@@ -31,30 +43,33 @@ class SectorPieChartWidget extends ChartWidget
         ];
     }
 
+    /**
+     * Assign colors from a predefined palette.
+     */
+    private function assignColors(array $categories): array
+    {
+        $colorPalette = [
+            "#ff073a", "#00f7ff", "#ffea00", "#8000ff", "#00ff44",
+            "#ff0099", "#00ffcc", "#ff4d00", "#ff00ff", "#00ff00",
+            "#ff4500", "#00ffff", "#ff1493", "#00ffbb", "#ffcc00",
+            "#7d00ff", "#ff3300", "#00e6e6", "#ff007f", "#00ff80",
+            "#ff9900", "#00d9ff", "#ff00cc", "#33ff00", "#ff0033",
+            "#00ffee", "#ff6600", "#6600ff", "#33ffcc", "#ff1100",
+            "#00ccff", "#ff0066", "#00ff55", "#ffcc33", "#0033ff",
+            "#ff00aa", "#00ffaa", "#ff8800", "#4400ff", "#00ffdd",
+            "#ff2200", "#00bbff", "#ff44cc", "#22ff00", "#ff5500",
+            "#00aaff", "#ff77cc", "#00ff33", "#ff3300", "#00ffbb"
+        ];
+        $colors = [];
+        foreach ($categories as $index => $category) {
+            $colors[] = $colorPalette[$index % count($colorPalette)];
+        }
+
+        return $colors;
+    }
+
     protected function getType(): string
     {
-        return 'pie';
-    }
-
-    /**
-     * Generate a consistent color for each category based on its name.
-     */
-    private function generateConsistentColors(array $categories): array
-    {
-        return array_map(fn($category) => $this->stringToColor($category, 220), $categories);
-    }
-
-    /**
-     * Convert a string (category name) into a unique, consistent hex color.
-     */
-    private function stringToColor(string $string, int $baseHue): string
-    {
-        $hash = crc32($string);
-
-        // Generate different saturation and lightness for variety
-        $saturation = 60 + ($hash % 20); // 60-80% saturation
-        $lightness = 50 + ($hash % 20); // 50-70% lightness
-
-        return "hsl($baseHue, {$saturation}%, {$lightness}%)";
+        return 'doughnut';
     }
 }

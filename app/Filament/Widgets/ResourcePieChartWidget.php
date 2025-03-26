@@ -10,6 +10,16 @@ class ResourcePieChartWidget extends ChartWidget
     protected static ?string $heading = 'Resource Pie Chart';
     protected int | string | array $columnSpan = '4';
 
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'scales' => [
+                'x' => ['display' => false], // Ensure X-axis is hidden
+                'y' => ['display' => false], // Ensure Y-axis is hidden
+            ],
+        ];
+    }
     protected function getData(): array
     {
         $countResource = Record::query()
@@ -19,14 +29,14 @@ class ResourcePieChartWidget extends ChartWidget
             ->pluck('count', 'resource')
             ->toArray();
 
-        $backgroundColors = $this->generateConsistentColors(array_keys($countResource));
+        $backgroundColors = $this->assignResourceColors(array_keys($countResource));
 
         return [
             'datasets' => [
                 [
                     'label' => 'Resource Count',
                     'data' => array_values($countResource),
-                    'backgroundColor' => $backgroundColors, // Assign consistent colors
+                    'backgroundColor' => $backgroundColors,
                 ]
             ],
             'labels' => array_keys($countResource)
@@ -35,29 +45,32 @@ class ResourcePieChartWidget extends ChartWidget
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'doughnut';
     }
 
     /**
-     * Generate a consistent color for each category based on its name.
+     * Assign colors from a different resource-specific palette.
      */
-    private function generateConsistentColors(array $categories): array
+    private function assignResourceColors(array $categories): array
     {
-        return array_map(fn($category) => $this->stringToColor($category, 330), $categories);
+        $colorPalette = [
+            "#8e44ad", "#3498db", "#f1c40f", "#e74c3c", "#d35400",
+            "#16a085", "#f1c40f", "#f39c12", "#c0392b", "#9b59b6",
+            "#e74c3c", "#f39c12", "#16a085", "#27ae60", "#2980b9",
+            "#f39c12", "#e67e22", "#d35400", "#e74c3c", "#c0392b",
+            "#9b59b6", "#8e44ad", "#34495e", "#2ecc71", "#1abc9c",
+            "#2ecc71", "#34495e", "#9b59b6", "#16a085", "#f39c12",
+            "#1abc9c", "#e67e22", "#c0392b", "#8e44ad", "#7f8c8d",
+            "#2980b9", "#f39c12", "#2ecc71", "#f1c40f", "#d35400",
+            "#9b59b6", "#16a085", "#1abc9c", "#e74c3c", "#e67e22",
+            "#f39c12", "#8e44ad", "#c0392b", "#3498db", "#7f8c8d"
+        ];
+
+        $colors = [];
+        foreach ($categories as $index => $category) {
+            $colors[] = $colorPalette[$index % count($colorPalette)];
+        }
+
+        return $colors;
     }
-
-    /**
-     * Convert a string (category name) into a unique, consistent hex color.
-     */
-    private function stringToColor(string $string, int $baseHue): string
-    {
-        $hash = crc32($string);
-
-        // Generate different saturation and lightness for variety
-        $saturation = 60 + ($hash % 20); // 60-80% saturation
-        $lightness = 50 + ($hash % 20); // 50-70% lightness
-
-        return "hsl($baseHue, {$saturation}%, {$lightness}%)";
-    }
-
 }

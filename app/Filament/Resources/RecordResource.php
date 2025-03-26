@@ -404,8 +404,8 @@ class RecordResource extends Resource
             ->actions([
                 ActionGroup::make([
                     Tables\Actions\EditAction::make(),
-                    SendEmailAction::make(),
-                    SendSmsAction::make(),
+//                    SendEmailAction::make(),
+//                    SendSmsAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
             ])
@@ -413,8 +413,8 @@ class RecordResource extends Resource
             ->paginated([5, 10, 25, 50, 100])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    SendBulkEmailAction::make(),
-                    SendBulkSmsAction::make(),
+//                    SendBulkEmailAction::make(),
+//                    SendBulkSmsAction::make(),
                     DeleteBulkAction::make(),
                 ]),
                 BulkAction::make('deleteAll')
