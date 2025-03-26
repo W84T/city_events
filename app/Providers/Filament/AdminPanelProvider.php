@@ -36,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->profile()
             ->brandName('City Events')
             ->brandLogo(asset('storage/logo.svg'))
+            ->favicon(asset('storage/favicon.svg'))
             ->darkModeBrandLogo(asset('storage/logo_white.svg'))
             ->navigationItems([
                 NavigationItem::make('Add Record')
