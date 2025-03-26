@@ -251,6 +251,9 @@ class RecordResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->searchOnBlur()
+            ->persistSearchInSession()
+            ->persistColumnSearchesInSession()
             ->columns([
                 TextColumn::make('exhibition')
                     ->label(__('form.exhibition'))
