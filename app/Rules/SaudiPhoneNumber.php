@@ -30,7 +30,7 @@ class SaudiPhoneNumber implements Rule
 
         // Define valid number patterns for mobile and landline numbers
         $validPatterns = [
-            '/^5[0345689]\d{6,8}$/',  // ✅ Mobile numbers (STC, Mobily, Zain, etc.)
+            '/^5[0345689]\d{7}$/',  // ✅ Mobile numbers (STC, Mobily, Zain, etc.)
             '/^1[0123467]\d{7}$/',    // ✅ Landlines (all valid regions)
             '/^81[1]\d{7}$/',         // ✅ GO nomadic numbers
             '/^57[01245678]\d{6}$/' , // ✅ MVNOs (Virgin, Red Bull, Lebara)
