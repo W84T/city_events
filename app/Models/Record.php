@@ -11,10 +11,9 @@ class Record extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'classification',
-        'resource',
-        'sector',
-        'subsector',
+        'resource_id',
+        'sector_id',
+        'exhibition_id',
         'title',
         'first_name',
         'last_name',
@@ -50,4 +49,20 @@ class Record extends Model
     {
         $query->selectRaw("CONCAT(first_name, ' ', last_name) as full_name");
     }
+
+    public function resource(): BelongsTo
+    {
+        return $this->belongsTo(Association::class, 'resource_id')->where('type', 'resource');
+    }
+
+    public function sector(): BelongsTo
+    {
+        return $this->belongsTo(Association::class, 'sector_id')->where('type', 'sector');
+    }
+
+    public function exhibition(): BelongsTo
+    {
+        return $this->belongsTo(Association::class, 'exhibition_id')->where('type', 'exhibition');
+    }
+
 }

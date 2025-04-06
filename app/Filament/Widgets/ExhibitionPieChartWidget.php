@@ -3,7 +3,9 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Record;
+use App\Models\Association;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
 class ExhibitionPieChartWidget extends ChartWidget
 {
@@ -15,32 +17,34 @@ class ExhibitionPieChartWidget extends ChartWidget
         return [
             'responsive' => true,
             'scales' => [
-                'x' => ['display' => false], // Ensure X-axis is hidden
-                'y' => ['display' => false], // Ensure Y-axis is hidden
+                'x' => ['display' => false],
+                'y' => ['display' => false],
             ],
         ];
     }
 
     protected function getData(): array
     {
-        $count = Record::query()
-            ->selectRaw('exhibition, COUNT(*) as count')
-            ->whereNotNull('exhibition')
-            ->groupBy('exhibition')
-            ->pluck('count', 'exhibition')
+        $data = Record::query()
+            ->select('associations.name as exhibition_name', DB::raw('COUNT(*) as count'))
+            ->join('associations', 'records.exhibition_id', '=', 'associations.id')
+            ->whereNotNull('records.exhibition_id')
+            ->where('associations.type', 'exhibition')
+            ->groupBy('associations.name')
+            ->pluck('count', 'exhibition_name')
             ->toArray();
 
-        $backgroundColors = $this->assignExhibitionColors(array_keys($count));
+        $backgroundColors = $this->assignExhibitionColors(array_keys($data));
 
         return [
             'datasets' => [
                 [
                     'label' => 'Exhibition Count',
-                    'data' => array_values($count),
+                    'data' => array_values($data),
                     'backgroundColor' => $backgroundColors,
                 ],
             ],
-            'labels' => array_keys($count),
+            'labels' => array_keys($data),
         ];
     }
 
@@ -49,9 +53,6 @@ class ExhibitionPieChartWidget extends ChartWidget
         return 'doughnut';
     }
 
-    /**
-     * Assign colors from a predefined exhibition-specific palette.
-     */
     private function assignExhibitionColors(array $categories): array
     {
         $exhibitionColorPalette = [

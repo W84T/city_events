@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Record;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
 class ResourcePieChartWidget extends ChartWidget
 {
@@ -15,31 +16,34 @@ class ResourcePieChartWidget extends ChartWidget
         return [
             'responsive' => true,
             'scales' => [
-                'x' => ['display' => false], // Ensure X-axis is hidden
-                'y' => ['display' => false], // Ensure Y-axis is hidden
+                'x' => ['display' => false],
+                'y' => ['display' => false],
             ],
         ];
     }
+
     protected function getData(): array
     {
-        $countResource = Record::query()
-            ->selectRaw('resource, COUNT(*) as count')
-            ->whereNotNull('resource')
-            ->groupBy('resource')
-            ->pluck('count', 'resource')
+        $data = Record::query()
+            ->select('associations.name as resource_name', DB::raw('COUNT(*) as count'))
+            ->join('associations', 'records.resource_id', '=', 'associations.id')
+            ->whereNotNull('records.resource_id')
+            ->where('associations.type', 'resource')
+            ->groupBy('associations.name')
+            ->pluck('count', 'resource_name')
             ->toArray();
 
-        $backgroundColors = $this->assignResourceColors(array_keys($countResource));
+        $backgroundColors = $this->assignResourceColors(array_keys($data));
 
         return [
             'datasets' => [
                 [
                     'label' => 'Resource Count',
-                    'data' => array_values($countResource),
+                    'data' => array_values($data),
                     'backgroundColor' => $backgroundColors,
                 ]
             ],
-            'labels' => array_keys($countResource)
+            'labels' => array_keys($data)
         ];
     }
 
@@ -48,9 +52,6 @@ class ResourcePieChartWidget extends ChartWidget
         return 'doughnut';
     }
 
-    /**
-     * Assign colors from a different resource-specific palette.
-     */
     private function assignResourceColors(array $categories): array
     {
         $colorPalette = [

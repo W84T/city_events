@@ -52,11 +52,11 @@ class RecordResource extends Resource
                     Section::make(__('form.association'))
                         ->columns(3)
                         ->schema([
-                            Select::make('exhibition')
+                            Select::make('exhibition_id')
+                                ->relationship('exhibition', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->label(__('form.exhibition'))
-                                ->options(Association::where('type', 'exhibition')->pluck('name', 'name'))
                                 ->createOptionForm([
                                     TextInput::make('name')->label(__('form.name'))->maxLength(255),
                                     TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
@@ -66,13 +66,13 @@ class RecordResource extends Resource
                                     'name' => $data['name'],
                                     'other_info' => $data['other_info'] ?? null,
                                     'type' => 'exhibition',
-                                ])->name),
+                                ])->id),
 
-                            Select::make('resource')
+                            Select::make('resource_id')
+                                ->relationship('resource', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->label(__('form.resource'))
-                                ->options(Association::where('type', 'resource')->pluck('name', 'name'))
                                 ->createOptionForm([
                                     TextInput::make('name')->label(__('form.name'))->maxLength(255),
                                     TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
@@ -82,13 +82,13 @@ class RecordResource extends Resource
                                     'name' => $data['name'],
                                     'other_info' => $data['other_info'] ?? null,
                                     'type' => 'resource',
-                                ])->name),
+                                ])->id),
 
-                            Select::make('sector')
+                            Select::make('sector_id')
+                                ->relationship('sector', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->label(__('form.sector'))
-                                ->options(Association::where('type', 'sector')->pluck('name', 'name'))
                                 ->createOptionForm([
                                     TextInput::make('name')->label(__('form.name'))->maxLength(255),
                                     TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
@@ -98,7 +98,7 @@ class RecordResource extends Resource
                                     'name' => $data['name'],
                                     'other_info' => $data['other_info'] ?? null,
                                     'type' => 'sector',
-                                ])->name),
+                                ])->id),
                         ]),
                     Section::make(__('form.information'))
                         ->columns(4) // Ensures proper layout per row
@@ -255,23 +255,23 @@ class RecordResource extends Resource
             ->persistSearchInSession()
             ->persistColumnSearchesInSession()
             ->columns([
-                TextColumn::make('exhibition')
+                TextColumn::make('exhibition.name')
                     ->label(__('form.exhibition'))
                     ->sortable()
                     ->searchable(isIndividual: true, isGlobal: false)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
-                TextColumn::make('resource')
+                TextColumn::make('resource.name')
                     ->label(__('form.resource'))
                     ->sortable()
                     ->searchable(isIndividual: true, isGlobal: false)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
-                TextColumn::make('sector')
+                TextColumn::make('sector.name')
                     ->label(__('form.sector'))
                     ->sortable()
                     ->searchable(isIndividual: true, isGlobal: false)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 TextColumn::make('full_name')
                     ->label(__('form.full_name'))
@@ -280,7 +280,7 @@ class RecordResource extends Resource
                     ->sortable(query: fn($query, $direction) => $query->orderByRaw("CONCAT(first_name, ' ', last_name) {$direction}")),
                 TextColumn::make('gender')
                     ->label(__('form.gender'))
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->sortable(),
                 TextColumn::make('email')
@@ -298,7 +298,7 @@ class RecordResource extends Resource
                     ->sortable(),
                 TextColumn::make('countryRelation.name')
                     ->label(__('form.country'))
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->sortable(),
                 TextColumn::make('stateRelation.name')
@@ -306,7 +306,7 @@ class RecordResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('company')
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->sortable(),
                 TextColumn::make('title')
@@ -325,21 +325,21 @@ class RecordResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('sector')
+                SelectFilter::make('sector_id')
+                    ->relationship('sector', 'name')
                     ->label(__('form.sector'))
                     ->searchable()
-                    ->options(Association::where('type', 'sector')->pluck('name', 'name'))
                     ->preload(),
 
-                SelectFilter::make('resource')
+                SelectFilter::make('resource_id')
+                    ->relationship('resource', 'name')
                     ->label(__('form.resource'))
                     ->searchable()
-                    ->options(Association::where('type', 'resource')->pluck('name', 'name'))
                     ->preload(),
-                SelectFilter::make('exhibition')
+                SelectFilter::make('exhibition_id')
+                    ->relationship('exhibition', 'name')
                     ->label(__('form.exhibition'))
                     ->searchable()
-                    ->options(Association::where('type', 'exhibition')->pluck('name', 'name'))
                     ->preload(),
 
                 TextFilter::make('first_name')
@@ -383,9 +383,9 @@ class RecordResource extends Resource
                     ->description()
                     ->schema([
                         Group::make([
-                            $filters['sector'],
-                            $filters['resource'],
-                            $filters['exhibition'],
+                            $filters['sector_id'],
+                            $filters['resource_id'],
+                            $filters['exhibition_id'],
                         ])->columns(3),
                     ])
                     ->columns(1),

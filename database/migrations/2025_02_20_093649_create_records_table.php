@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('records', function (Blueprint $table) {
             $table->id();
-            $table->string('classification')->nullable();
+
             $table->string('resource')->nullable();
             $table->string('sector')->nullable();
-            $table->string('subsector')->nullable();
+            $table->string('exhibition')->nullable();
+
             $table->text('title')->nullable();
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();

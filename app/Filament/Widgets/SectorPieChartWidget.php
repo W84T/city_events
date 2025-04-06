@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Record;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
 class SectorPieChartWidget extends ChartWidget
 {
@@ -15,31 +16,34 @@ class SectorPieChartWidget extends ChartWidget
         return [
             'responsive' => true,
             'scales' => [
-                'x' => ['display' => false], // Ensure X-axis is hidden
-                'y' => ['display' => false], // Ensure Y-axis is hidden
+                'x' => ['display' => false],
+                'y' => ['display' => false],
             ],
         ];
     }
+
     protected function getData(): array
     {
-        $count = Record::query()
-            ->selectRaw('sector, COUNT(*) as count')
-            ->wherenotNull('sector')
-            ->groupBy('sector')
-            ->pluck('count', 'sector')
+        $data = Record::query()
+            ->select('associations.name as sector_name', DB::raw('COUNT(*) as count'))
+            ->join('associations', 'records.sector_id', '=', 'associations.id')
+            ->whereNotNull('records.sector_id')
+            ->where('associations.type', 'sector')
+            ->groupBy('associations.name')
+            ->pluck('count', 'sector_name')
             ->toArray();
 
-        $backgroundColors = $this->assignColors(array_keys($count));
+        $backgroundColors = $this->assignColors(array_keys($data));
 
         return [
             'datasets' => [
                 [
                     'label' => 'Sector Count',
-                    'data' => array_values($count),
+                    'data' => array_values($data),
                     'backgroundColor' => $backgroundColors,
                 ]
             ],
-            'labels' => array_keys($count),
+            'labels' => array_keys($data),
         ];
     }
 
@@ -60,6 +64,7 @@ class SectorPieChartWidget extends ChartWidget
             "#ff2200", "#00bbff", "#ff44cc", "#22ff00", "#ff5500",
             "#00aaff", "#ff77cc", "#00ff33", "#ff3300", "#00ffbb"
         ];
+
         $colors = [];
         foreach ($categories as $index => $category) {
             $colors[] = $colorPalette[$index % count($colorPalette)];

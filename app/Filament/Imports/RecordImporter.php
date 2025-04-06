@@ -22,15 +22,15 @@ class RecordImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('sector')
+            ImportColumn::make('sector_id')
                 ->requiredMapping()
                 ->guess(['Sector', 'sector']),
 
-            ImportColumn::make('resource')
+            ImportColumn::make('resource_id')
                 ->requiredMapping()
                 ->guess(['Resource', 'resource']),
 
-            ImportColumn::make('exhibition')
+            ImportColumn::make('exhibition_id')
                 ->requiredMapping()
                 ->guess(['Exhibition', 'exhibition', 'Exhibition Name']),
 
@@ -56,12 +56,6 @@ class RecordImporter extends Importer
 
             ImportColumn::make('email')
                 ->requiredMapping()
-                ->rules([
-                    'nullable',
-                    'email',
-                    'unique:records,email',
-                    'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-                ])
                 ->guess(['Email ', 'email', 'Email']),
 
             ImportColumn::make('mobile_number')
@@ -114,9 +108,9 @@ class RecordImporter extends Importer
         $this->sanitizeTitle();
         $this->resolveCountryCity();
 
-        $this->data['sector'] = $this->resolveAssociationId($this->data['sector'], 'sector');
-        $this->data['resource'] = $this->resolveAssociationId($this->data['resource'], 'resource');
-        $this->data['exhibition'] = $this->resolveAssociationId($this->data['exhibition'], 'exhibition');
+        $this->data['sector_id'] = $this->resolveAssociationId($this->data['sector_id'], 'sector');
+        $this->data['resource_id'] = $this->resolveAssociationId($this->data['resource_id'], 'resource');
+        $this->data['exhibition_id'] = $this->resolveAssociationId($this->data['exhibition_id'], 'exhibition');
 
         $this->validateAndProcessPhoneNumbers();
         $this->validateEmail();
@@ -166,11 +160,19 @@ class RecordImporter extends Importer
 
     protected function validateEmail(): void
     {
-        $emailValid = !empty($this->data['email']) &&
-            Validator::make(['email' => $this->data['email']], ['email' => ['email', 'unique:records,email']])->passes();
+        if (!empty($this->data['email'])) {
+            $email = $this->data['email'];
 
-        if (!$emailValid) {
-            $this->data['email'] = null;
+            $isValid = Validator::make(
+                ['email' => $email],
+                ['email' => ['email', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/']]
+            )->passes();
+
+            $isUnique = !Record::where('email', $email)->exists();
+
+            if (!$isValid || !$isUnique) {
+                $this->data['email'] = null;
+            }
         }
     }
 
@@ -207,7 +209,18 @@ class RecordImporter extends Importer
         }
 
         $association = Association::where('name', $name)->where('type', $type)->first();
-        return $association ? $association->name : Association::create(['name' => $name, 'type' => $type])->name;
+
+
+        if ($association) {
+            return $association->id;
+        }
+
+        $newAssociation = Association::create([
+            'name' => $name,
+            'type' => $type,
+        ]);
+
+        return $newAssociation->id;
     }
 
     protected function isLikelyFakeNumber(string $number): bool

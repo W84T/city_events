@@ -20,9 +20,9 @@ class RecordExporter extends Exporter
         return [
 //            ExportColumn::make('id')
 //                ->label('ID'),
-            ExportColumn::make('exhibition'),
-            ExportColumn::make('resource'),
-            ExportColumn::make('sector'),
+            ExportColumn::make('exhibition.name')->label('Exhibition name'),
+            ExportColumn::make('resource.name')->label('Resource'),
+            ExportColumn::make('sector.name')->label('Sector'),
 //            ExportColumn::make('title'),
 //            ExportColumn::make('first_name'),
 //            ExportColumn::make('last_name'),
