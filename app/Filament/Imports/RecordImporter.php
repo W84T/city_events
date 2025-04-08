@@ -14,7 +14,7 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Validator;
 use Propaganistas\LaravelPhone\Rules\Phone;
-
+use Filament\Forms\Components\Actions\Action as FormAction;
 class RecordImporter extends Importer
 {
     protected static ?string $model = Record::class;
@@ -114,9 +114,15 @@ class RecordImporter extends Importer
 
         $this->validateAndProcessPhoneNumbers();
         $this->validateEmail();
-        if (empty($this->data['email']) && empty($this->data['mobile_number'])) {
-            throw new RowImportFailedException("Email or Phone are must be valid");
+        // Use phone as fallback if mobile_number is empty and phone is valid
+        if (empty($this->data['mobile_number']) && !empty($this->data['phone'])) {
+            $this->data['mobile_number'] = $this->data['phone'];
         }
+
+        if (empty($this->data['email']) && empty($this->data['mobile_number'])) {
+            throw new RowImportFailedException("Email or Phone must be valid");
+        }
+
         return empty($this->data['email']) ? new Record() : Record::firstOrNew(['email' => $this->data['email']]);
     }
 
@@ -126,6 +132,7 @@ class RecordImporter extends Importer
 
         foreach ($phoneFields as $field) {
             if (!empty($this->data[$field])) {
+                $this->data[$field] = trim(explode("\n", $this->data[$field])[0]);
                 $this->data[$field] = trim($this->data[$field]);
                 if (!str_starts_with($this->data[$field], '+')) {
                     if (preg_match('/^5\d{8}$/', $this->data[$field])) {
