@@ -6,18 +6,28 @@ use App\Models\Record;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 
-class SectorPieChartWidget extends ChartWidget
+class SectorBarChartWidget extends ChartWidget
 {
     protected static ?string $heading = 'Sector Pie Chart';
-    protected int|string|array $columnSpan = '4';
-
+    protected int|string|array $columnSpan = '8';
+    protected static ?string $maxHeight = '400px';
     protected function getOptions(): array
     {
         return [
             'responsive' => true,
-            'scales' => [
-                'x' => ['display' => false],
-                'y' => ['display' => false],
+            'plugins' => [
+
+                'legend' => [
+                    'display' => false, // hide legend
+                ],
+            ],
+            'interaction' => [
+                'mode' => 'nearest',
+                'intersect' => false,
+            ],
+            'hover' => [
+                'mode' => 'nearest',
+                'intersect' => true,
             ],
         ];
     }
@@ -41,6 +51,8 @@ class SectorPieChartWidget extends ChartWidget
                     'label' => 'Sector Count',
                     'data' => array_values($data),
                     'backgroundColor' => $backgroundColors,
+                    'borderWidth' => 0,
+                    'borderRadius' => 7,
                 ]
             ],
             'labels' => array_keys($data),
@@ -75,6 +87,6 @@ class SectorPieChartWidget extends ChartWidget
 
     protected function getType(): string
     {
-        return 'doughnut';
+        return 'bar';
     }
 }

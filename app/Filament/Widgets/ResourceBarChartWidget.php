@@ -6,21 +6,33 @@ use App\Models\Record;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 
-class ResourcePieChartWidget extends ChartWidget
+class ResourceBarChartWidget extends ChartWidget
 {
     protected static ?string $heading = 'Resource Pie Chart';
-    protected int | string | array $columnSpan = '4';
+    protected int | string | array $columnSpan = 'full';
+    protected static ?string $maxHeight = '500px';
 
     protected function getOptions(): array
     {
         return [
             'responsive' => true,
-            'scales' => [
-                'x' => ['display' => false],
-                'y' => ['display' => false],
+            'plugins' => [
+
+                'legend' => [
+                    'display' => false, // hide legend
+                ],
+            ],
+            'interaction' => [
+                'mode' => 'nearest',
+                'intersect' => false,
+            ],
+            'hover' => [
+                'mode' => 'nearest',
+                'intersect' => true,
             ],
         ];
     }
+
 
     protected function getData(): array
     {
@@ -38,9 +50,11 @@ class ResourcePieChartWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Resource Count',
+                    'label' => '',
                     'data' => array_values($data),
                     'backgroundColor' => $backgroundColors,
+                    'borderWidth' => 0,
+                    'borderRadius' => 7,
                 ]
             ],
             'labels' => array_keys($data)
@@ -49,7 +63,7 @@ class ResourcePieChartWidget extends ChartWidget
 
     protected function getType(): string
     {
-        return 'doughnut';
+        return 'bar';
     }
 
     private function assignResourceColors(array $categories): array

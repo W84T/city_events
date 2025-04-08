@@ -261,14 +261,14 @@ class RecordResource extends Resource
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(),
 
-                TextColumn::make('resource.name')
-                    ->label(__('form.resource'))
+                TextColumn::make('sector.name')
+                    ->label(__('form.sector'))
                     ->sortable()
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(),
 
-                TextColumn::make('sector.name')
-                    ->label(__('form.sector'))
+                TextColumn::make('resource.name')
+                    ->label(__('form.resource'))
                     ->sortable()
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->toggleable(),
@@ -325,6 +325,12 @@ class RecordResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('exhibition_id')
+                    ->relationship('exhibition', 'name')
+                    ->label(__('form.exhibition'))
+                    ->searchable()
+                    ->preload(),
+
                 SelectFilter::make('sector_id')
                     ->relationship('sector', 'name')
                     ->label(__('form.sector'))
@@ -334,11 +340,6 @@ class RecordResource extends Resource
                 SelectFilter::make('resource_id')
                     ->relationship('resource', 'name')
                     ->label(__('form.resource'))
-                    ->searchable()
-                    ->preload(),
-                SelectFilter::make('exhibition_id')
-                    ->relationship('exhibition', 'name')
-                    ->label(__('form.exhibition'))
                     ->searchable()
                     ->preload(),
 
@@ -383,9 +384,9 @@ class RecordResource extends Resource
                     ->description()
                     ->schema([
                         Group::make([
+                            $filters['exhibition_id'],
                             $filters['sector_id'],
                             $filters['resource_id'],
-                            $filters['exhibition_id'],
                         ])->columns(3),
                     ])
                     ->columns(1),

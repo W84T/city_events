@@ -4,8 +4,8 @@ namespace App\Providers\Filament;
 
 use App\Filament\Resources\RecordResource;
 use App\Filament\Widgets\ExhibitionPieChartWidget;
-use App\Filament\Widgets\ResourcePieChartWidget;
-use App\Filament\Widgets\SectorPieChartWidget;
+use App\Filament\Widgets\ResourceBarChartWidget;
+use App\Filament\Widgets\SectorBarChartWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -74,8 +74,8 @@ class AdminPanelProvider extends PanelProvider
             ->pages([])
             ->widgets([
                 ExhibitionPieChartWidget::class,
-                ResourcePieChartWidget::class,
-                SectorPieChartWidget::class
+                SectorBarChartWidget::class,
+                ResourceBarChartWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

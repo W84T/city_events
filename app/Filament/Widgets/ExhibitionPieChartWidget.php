@@ -11,6 +11,7 @@ class ExhibitionPieChartWidget extends ChartWidget
 {
     protected static ?string $heading = 'Exhibition Pie Chart';
     protected int | string | array $columnSpan = '4';
+    protected static ?string $maxHeight = '400px';
 
     protected function getOptions(): array
     {
@@ -50,7 +51,7 @@ class ExhibitionPieChartWidget extends ChartWidget
 
     protected function getType(): string
     {
-        return 'doughnut';
+        return 'pie';
     }
 
     private function assignExhibitionColors(array $categories): array
