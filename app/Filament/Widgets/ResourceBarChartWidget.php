@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class ResourceBarChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Resource Pie Chart';
+    protected static ?string $heading = 'Resource Bar Chart';
     protected int | string | array $columnSpan = 'full';
     protected static ?string $maxHeight = '500px';
 

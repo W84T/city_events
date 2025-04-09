@@ -33,6 +33,7 @@ use Webbingbrasil\FilamentAdvancedFilter\Filters\TextFilter;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
+use Illuminate\Database\Eloquent\Builder;
 
 
 class RecordResource extends Resource
@@ -326,10 +327,30 @@ class RecordResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('exhibition_id')
-                    ->relationship('exhibition', 'name')
+                    ->relationship(
+                        'exhibition',
+                        'name',
+                        modifyQueryUsing: fn ($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 1 ELSE 0 END")->orderBy('name')
+                    )
                     ->label(__('form.exhibition'))
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->indicateUsing(function (array $data): array {
+                        if (!$data['value']) {
+                            return [];
+                        }
+
+                        $exhibition = \App\Models\Association::find($data['value']);
+
+                        if (!$exhibition) {
+                            return [];
+                        }
+
+                        return [
+                            __('form.exhibition') . ': ' . $exhibition->name,
+                        ];
+                    }),
+
 
                 SelectFilter::make('sector_id')
                     ->relationship('sector', 'name')

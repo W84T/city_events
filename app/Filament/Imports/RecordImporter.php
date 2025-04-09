@@ -84,7 +84,7 @@ class RecordImporter extends Importer
 
             ImportColumn::make('phone')
                 ->requiredMapping()
-                ->guess(['Phone 1 ', 'phone']),
+                ->guess(['Phone 1 ', 'phone', 'phone 1']),
         ];
     }
 
