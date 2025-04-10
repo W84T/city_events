@@ -148,6 +148,7 @@ class RecordResource extends Resource
 
                             PhoneInput::make('mobile_number')
                                 ->label(__('form.mobile_number'))
+                                ->unique(Record::class, 'mobile_number', ignoreRecord: true)
                                 ->excludeCountries(['IL'])
                                 ->validateFor($country = 'AUTO', $type = null, false)
                                 ->columnSpan(2),
