@@ -23,15 +23,12 @@ class RecordExporter extends Exporter
             ExportColumn::make('exhibition.name')->label('Exhibition name'),
             ExportColumn::make('resource.name')->label('Resource'),
             ExportColumn::make('sector.name')->label('Sector'),
-//            ExportColumn::make('title'),
-//            ExportColumn::make('first_name'),
-//            ExportColumn::make('last_name'),
             ExportColumn::make('full_name'),
             ExportColumn::make('email'),
             ExportColumn::make('mobile_number'),
             ExportColumn::make('gender'),
-            ExportColumn::make('countryRelation.name'),
-            ExportColumn::make('stateRelation.name'),
+            ExportColumn::make('countryRelation.name')->label('country'),
+            ExportColumn::make('stateRelation.name')->label('city'),
             ExportColumn::make('phone')
                 ->formatStateUsing(function ($state) {
                     // Convert JSON array to comma-separated string
@@ -40,6 +37,9 @@ class RecordExporter extends Exporter
             ExportColumn::make('company'),
             ExportColumn::make('job_title'),
             ExportColumn::make('website'),
+            ExportColumn::make('title')->enabledByDefault(false),
+            ExportColumn::make('first_name')->enabledByDefault(false),
+            ExportColumn::make('last_name')->enabledByDefault(false),
         ];
     }
 
