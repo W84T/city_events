@@ -54,7 +54,10 @@ class RecordResource extends Resource
                         ->columns(3)
                         ->schema([
                             Select::make('exhibition_id')
-                                ->relationship('exhibition', 'name')
+                                ->relationship(
+                                    'exhibition',
+                                    'name',
+                                    modifyQueryUsing: fn ($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")->orderBy('name'))
                                 ->searchable()
                                 ->preload()
                                 ->label(__('form.exhibition'))
@@ -358,7 +361,7 @@ class RecordResource extends Resource
                     ->relationship(
                         'exhibition',
                         'name',
-                        modifyQueryUsing: fn ($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 1 ELSE 0 END")->orderBy('name')
+                        modifyQueryUsing: fn ($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")->orderBy('name')
                     )
                     ->label(__('form.exhibition'))
                     ->searchable()

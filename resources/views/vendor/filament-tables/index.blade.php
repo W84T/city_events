@@ -955,11 +955,12 @@
                                         @switch($columnName)
                                             @case('exhibition.name')
                                                 @php
+
                                                     $options = Association::where('type', 'exhibition')
-                                                        ->orderByRaw("CASE WHEN name = 'other' THEN 1 ELSE 0 END")
-                                                        ->orderBy('name')
-                                                        ->pluck('name', 'id')
-                                                        ->toArray();
+                                                  ->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")
+                                                  ->orderBy('name')
+                                                  ->pluck('name', 'id')
+                                                  ->toArray();
                                                 @endphp
                                                 <x-filament-tables::select-search-field
                                                     :debounce="$searchDebounce"
