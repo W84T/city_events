@@ -42,7 +42,6 @@ class SaudiPhoneNumber implements Rule
         // Valid number patterns
         $validPatterns = [
             '/^5[0345689]\d{7}$/',   // Mobile numbers
-            '/^1[0123467]\d{7}$/',   // Landlines
             '/^81[1]\d{7}$/',        // GO nomadic numbers
             '/^57[01245678]\d{6}$/', // MVNOs
             '/^51\d{7}$/',           // Salam Mobile

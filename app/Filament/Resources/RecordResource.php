@@ -263,11 +263,13 @@ class RecordResource extends Resource
                         isIndividual: true,
                         isGlobal: false,
                         query: function ($query, $search) {
+                            $search = urldecode(trim($search));
                             $query->whereHas('exhibition', function ($q) use ($search) {
-                                $q->where('name', '=', $search);
+                                $q->where('id', '=', $search);
                             });
                         }
                     )
+
                     ->toggleable(),
 
 
@@ -279,7 +281,7 @@ class RecordResource extends Resource
                         isGlobal: false,
                         query: function ($query, $search) {
                             $query->whereHas('sector', function ($q) use ($search) {
-                                $q->where('name', '=', $search);
+                                $q->where('id', '=', $search);
                             });
                         }
                     )
@@ -293,7 +295,7 @@ class RecordResource extends Resource
                         isGlobal: false,
                         query: function ($query, $search) {
                             $query->whereHas('resource', function ($q) use ($search) {
-                                $q->where('name', '=', $search);
+                                $q->where('id', '=', $search);
                             });
                         }
                     )

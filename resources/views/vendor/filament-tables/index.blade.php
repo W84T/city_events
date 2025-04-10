@@ -955,11 +955,10 @@
                                         @switch($columnName)
                                             @case('exhibition.name')
                                                 @php
-
                                                     $options = Association::where('type', 'exhibition')
                                                         ->orderByRaw("CASE WHEN name = 'other' THEN 1 ELSE 0 END")
                                                         ->orderBy('name')
-                                                        ->pluck('name', 'name')
+                                                        ->pluck('name', 'id')
                                                         ->toArray();
                                                 @endphp
                                                 <x-filament-tables::select-search-field
@@ -972,7 +971,7 @@
 
                                             @case('sector.name')
                                                 @php
-                                                    $options = Association::where('type', 'sector')->pluck('name', 'name')->toArray();
+                                                    $options = Association::where('type', 'sector')->pluck('name', 'id')->toArray();
                                                 @endphp
 
                                                 <x-filament-tables::select-search-field
@@ -985,7 +984,7 @@
 
                                             @case('resource.name')
                                                 @php
-                                                    $options = Association::where('type', 'resource')->pluck('name', 'name')->toArray();
+                                                    $options = Association::where('type', 'resource')->pluck('name', 'id')->toArray();
                                                 @endphp
 
                                                 <x-filament-tables::select-search-field

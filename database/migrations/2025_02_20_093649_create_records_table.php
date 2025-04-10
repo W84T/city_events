@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('records', function (Blueprint $table) {
             $table->id();
 
-            $table->string('resource')->nullable();
-            $table->string('sector')->nullable();
-            $table->string('exhibition')->nullable();
+            $table->string('resource_id')->constrained('associations')->nullOnDelete();;
+            $table->string('sector_id')->constrained('associations')->nullOnDelete();;
+            $table->string('exhibition_id')->constrained('associations')->nullOnDelete();;
 
             $table->text('title')->nullable();
             $table->string('first_name')->nullable();
