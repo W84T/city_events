@@ -259,19 +259,44 @@ class RecordResource extends Resource
                 TextColumn::make('exhibition.name')
                     ->label(__('form.exhibition'))
                     ->sortable()
-                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->searchable(
+                        isIndividual: true,
+                        isGlobal: false,
+                        query: function ($query, $search) {
+                            $query->whereHas('exhibition', function ($q) use ($search) {
+                                $q->where('name', '=', $search);
+                            });
+                        }
+                    )
                     ->toggleable(),
+
 
                 TextColumn::make('sector.name')
                     ->label(__('form.sector'))
                     ->sortable()
-                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->searchable(
+                        isIndividual: true,
+                        isGlobal: false,
+                        query: function ($query, $search) {
+                            $query->whereHas('sector', function ($q) use ($search) {
+                                $q->where('name', '=', $search);
+                            });
+                        }
+                    )
                     ->toggleable(),
 
                 TextColumn::make('resource.name')
                     ->label(__('form.resource'))
                     ->sortable()
-                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->searchable(
+                        isIndividual: true,
+                        isGlobal: false,
+                        query: function ($query, $search) {
+                            $query->whereHas('resource', function ($q) use ($search) {
+                                $q->where('name', '=', $search);
+                            });
+                        }
+                    )
                     ->toggleable(),
 
                 TextColumn::make('full_name')
