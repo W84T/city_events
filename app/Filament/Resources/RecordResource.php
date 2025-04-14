@@ -2,10 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Actions\SendBulkEmailAction;
-use App\Actions\SendBulkSmsAction;
-use App\Actions\SendEmailAction;
-use App\Actions\SendSmsAction;
 use App\Filament\Resources\RecordResource\Pages;
 use App\Models\Association;
 use App\Models\Record;
@@ -26,6 +22,7 @@ use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
@@ -33,7 +30,6 @@ use Webbingbrasil\FilamentAdvancedFilter\Filters\TextFilter;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
-use Illuminate\Database\Eloquent\Builder;
 
 
 class RecordResource extends Resource
@@ -44,6 +40,346 @@ class RecordResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
     protected static ?string $activeNavigationIcon = 'heroicon-s-table-cells';
     protected static ?int $navigationSort = 0;
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListRecords::route('/'),
+            'create' => Pages\CreateRecord::route('/create'),
+            'edit' => Pages\EditRecord::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('panel.record');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('panel.records');
+    }
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            NavigationItem::make()
+                ->label(__('Records'))
+                ->icon(static::getNavigationIcon())
+                ->url(static::getUrl('index'))
+                ->isActiveWhen(fn() => request()->routeIs([
+                    'filament.admin.resources.records.index',
+                    'filament.admin.resources.records.edit',
+                ])),
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->searchOnBlur()
+            ->persistSearchInSession()
+            ->persistColumnSearchesInSession()
+            ->columns([
+                TextColumn::make('exhibition.name')
+                    ->label(__('form.exhibition'))
+                    ->sortable()
+                    ->searchable(
+                        isIndividual: true,
+                        isGlobal: false,
+                        query: function ($query, $search) {
+                            $search = urldecode(trim($search));
+                            $query->whereHas('exhibition', function ($q) use ($search) {
+                                $q->where('id', '=', $search);
+                            });
+                        }
+                    )
+                    ->toggleable(),
+
+
+                TextColumn::make('sector.name')
+                    ->label(__('form.sector'))
+                    ->sortable()
+                    ->searchable(
+                        isIndividual: true,
+                        isGlobal: false,
+                        query: function ($query, $search) {
+                            $query->whereHas('sector', function ($q) use ($search) {
+                                $q->where('id', '=', $search);
+                            });
+                        }
+                    )
+                    ->toggleable(),
+
+                TextColumn::make('resource.name')
+                    ->label(__('form.resource'))
+                    ->sortable()
+                    ->searchable(
+                        isIndividual: true,
+                        isGlobal: false,
+                        query: function ($query, $search) {
+                            $query->whereHas('resource', function ($q) use ($search) {
+                                $q->where('id', '=', $search);
+                            });
+                        }
+                    )
+                    ->toggleable(),
+
+                TextColumn::make('full_name')
+                    ->label(__('form.full_name'))
+                    ->toggleable()
+                    ->searchable(isIndividual: true, isGlobal: false, query: fn($query, $search) => $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]))
+                    ->sortable(query: fn($query, $direction) => $query->orderByRaw("CONCAT(first_name, ' ', last_name) {$direction}")),
+                TextColumn::make('gender')
+                    ->label(__('form.gender'))
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->copyable()
+                    ->toggleable()
+                    ->copyMessage(__('Email copied'))
+                    ->label(__('form.email'))
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable(),
+                PhoneColumn::make('mobile_number')->displayFormat(PhoneInputNumberType::INTERNATIONAL)
+                    ->copyable()
+                    ->toggleable()
+                    ->copyMessage('mobile number copied')
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable(),
+                TextColumn::make('countryRelation.name')
+                    ->label(__('form.country'))
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable(),
+                TextColumn::make('stateRelation.name')
+                    ->label(__('form.city'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('company')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable(),
+                TextColumn::make('title')
+                    ->label(__('form.title'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('website')
+                    ->label(__('form.website'))
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('job_title')
+                    ->label(__('form.job_title'))
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Filter::make('exhibition_filter')
+                    ->form([
+                        Group::make([
+                            Select::make('exhibition_id')
+                                ->label(__('form.exhibition'))
+                                ->options(
+                                    Association::query()
+                                        ->where('type', 'exhibition')
+                                        ->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->toArray()
+                                ),
+
+                            Select::make('sector_id')
+                                ->label(__('form.sector'))
+                                ->options(function ($get) {
+                                    $exhibitionId = $get('exhibition_id');
+
+                                    if (!$exhibitionId) return [];
+
+                                    return Record::query()
+                                        ->where('exhibition_id', $exhibitionId)
+                                        ->select('sector_id')
+                                        ->distinct()
+                                        ->with('sector')
+                                        ->get()
+                                        ->mapWithKeys(function ($record) {
+                                            return [$record->sector_id => optional($record->sector)->name];
+                                        })
+                                        ->filter()
+                                        ->toArray();
+                                }),
+
+                            Select::make('resource_id')
+                                ->label(__('form.resource'))
+                                ->options(function ($get) {
+                                    $exhibitionId = $get('exhibition_id');
+
+                                    if (!$exhibitionId) return [];
+
+                                    return Record::query()
+                                        ->where('exhibition_id', $exhibitionId)
+                                        ->select('resource_id')
+                                        ->distinct()
+                                        ->with('resource')
+                                        ->get()
+                                        ->mapWithKeys(function ($record) {
+                                            return [$record->resource_id => optional($record->resource)->name];
+                                        })
+                                        ->filter()
+                                        ->toArray();
+                                }),
+                        ])->columns(3) // ✅ هنا الصح، تقسيم الأعمدة للـ Group كله
+                    ])
+
+                    ->query(function ($query, array $data) {
+                        if ($data['exhibition_id'] ?? null) {
+                            $query->where('exhibition_id', $data['exhibition_id']);
+                        }
+
+                        if ($data['sector_id'] ?? null) {
+                            $query->where('sector_id', $data['sector_id']);
+                        }
+
+                        if ($data['resource_id'] ?? null) {
+                            $query->where('resource_id', $data['resource_id']);
+                        }
+
+                        return $query;
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if (!empty($data['exhibition_id'])) {
+                            $exhibition = Association::find($data['exhibition_id']);
+                            if ($exhibition) {
+                                $indicators[] = __('form.exhibition') . ': ' . $exhibition->name;
+                            }
+                        }
+
+                        if (!empty($data['sector_id'])) {
+                            $sector = Association::find($data['sector_id']);
+                            if ($sector) {
+                                $indicators[] = __('form.sector') . ': ' . $sector->name;
+                            }
+                        }
+
+                        if (!empty($data['resource_id'])) {
+                            $resource = Association::find($data['resource_id']);
+                            if ($resource) {
+                                $indicators[] = __('form.resource') . ': ' . $resource->name;
+                            }
+                        }
+
+                        return $indicators;
+                    }),
+
+
+                TextFilter::make('first_name')
+                    ->default(TextFilter::CLAUSE_CONTAIN)
+                    ->wrapperUsing(fn() => Group::make())
+                    ->enableClauseLabel(),
+
+                TextFilter::make('last_name')
+                    ->default(TextFilter::CLAUSE_CONTAIN)
+                    ->wrapperUsing(fn() => Group::make())
+                    ->enableClauseLabel(),
+
+                TextFilter::make('email')
+                    ->default(TextFilter::CLAUSE_CONTAIN)
+                    ->wrapperUsing(fn() => Group::make())
+                    ->enableClauseLabel(),
+
+                TextFilter::make('mobile_number')
+                    ->default(TextFilter::CLAUSE_CONTAIN)
+                    ->wrapperUsing(fn() => Group::make())
+                    ->enableClauseLabel(),
+
+                SelectFilter::make('country')
+                    ->label(__('form.country'))
+                    ->relationship('countryRelation', 'name')
+                    ->preload(),
+
+                SelectFilter::make('gender')
+                    ->label(__('form.gender'))
+                    ->options([
+                        'male' => __('form.male'),
+                        'female' => __('form.female'),
+                    ]),
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(4)
+            ->filtersFormSchema(fn(array $filters): array => [
+                Section::make()
+                    ->description()
+                    ->schema([
+                        Group::make([
+                            $filters['first_name'],
+                            $filters['last_name'],
+                            $filters['email'],
+                            $filters['mobile_number'],
+                        ])->columns(4),
+                    ])
+                    ->columns(1),
+
+                Section::make()
+                    ->description()
+                    ->schema([
+                        Group::make([
+                            $filters['exhibition_filter'],
+                        ])->columns(1),
+                    ])
+                    ->columns(1),
+
+                Section::make()
+                    ->description()
+                    ->schema([
+                        Group::make([
+                            $filters['country'],
+                            $filters['gender'],
+                        ])->columns(2),
+                    ])
+                    ->columns(1),
+            ])
+            ->actions([
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+//                    SendEmailAction::make(),
+//                    SendSmsAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+            ])
+            ->selectCurrentPageOnly()
+            ->paginated([5, 10, 25, 50, 100])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+//                    SendBulkEmailAction::make(),
+//                    SendBulkSmsAction::make(),
+                    DeleteBulkAction::make(),
+                ]),
+                BulkAction::make('deleteAll')
+                    ->label(fn($livewire) => __('Delete All ' . $livewire->getFilteredTableQuery()->count() . ' Records'))
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->deselectRecordsAfterCompletion()
+                    ->requiresConfirmation()
+                    ->action(function ($livewire) {
+                        if (method_exists($livewire, 'getFilteredTableQuery')) {
+                            $filteredQuery = $livewire->getFilteredTableQuery();
+                            $filteredQuery->delete();
+                        } else {
+                            Record::query()->delete();
+                        }
+                    })
+            ]);
+    }
 
     public static function form(Form $form): Form
     {
@@ -57,7 +393,7 @@ class RecordResource extends Resource
                                 ->relationship(
                                     'exhibition',
                                     'name',
-                                    modifyQueryUsing: fn ($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")->orderBy('name'))
+                                    modifyQueryUsing: fn($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")->orderBy('name'))
                                 ->searchable()
                                 ->preload()
                                 ->label(__('form.exhibition'))
@@ -211,280 +547,6 @@ class RecordResource extends Resource
                         ]),
                 ])
             ])->columns(1);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListRecords::route('/'),
-            'create' => Pages\CreateRecord::route('/create'),
-            'edit' => Pages\EditRecord::route('/{record}/edit'),
-        ];
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('panel.record');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('panel.records');
-    }
-
-    public static function getNavigationItems(): array
-    {
-        return [
-            NavigationItem::make()
-                ->label(__('Records'))
-                ->icon(static::getNavigationIcon())
-                ->url(static::getUrl('index'))
-                ->isActiveWhen(fn() => request()->routeIs([
-                    'filament.admin.resources.records.index',
-                    'filament.admin.resources.records.edit',
-                ])),
-        ];
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->searchOnBlur()
-            ->persistSearchInSession()
-            ->persistColumnSearchesInSession()
-            ->columns([
-                TextColumn::make('exhibition.name')
-                    ->label(__('form.exhibition'))
-                    ->sortable()
-                    ->searchable(
-                        isIndividual: true,
-                        isGlobal: false,
-                        query: function ($query, $search) {
-                            $search = urldecode(trim($search));
-                            $query->whereHas('exhibition', function ($q) use ($search) {
-                                $q->where('id', '=', $search);
-                            });
-                        }
-                    )
-
-                    ->toggleable(),
-
-
-                TextColumn::make('sector.name')
-                    ->label(__('form.sector'))
-                    ->sortable()
-                    ->searchable(
-                        isIndividual: true,
-                        isGlobal: false,
-                        query: function ($query, $search) {
-                            $query->whereHas('sector', function ($q) use ($search) {
-                                $q->where('id', '=', $search);
-                            });
-                        }
-                    )
-                    ->toggleable(),
-
-                TextColumn::make('resource.name')
-                    ->label(__('form.resource'))
-                    ->sortable()
-                    ->searchable(
-                        isIndividual: true,
-                        isGlobal: false,
-                        query: function ($query, $search) {
-                            $query->whereHas('resource', function ($q) use ($search) {
-                                $q->where('id', '=', $search);
-                            });
-                        }
-                    )
-                    ->toggleable(),
-
-                TextColumn::make('full_name')
-                    ->label(__('form.full_name'))
-                    ->toggleable()
-                    ->searchable(isIndividual: true, isGlobal: false, query: fn($query, $search) => $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]))
-                    ->sortable(query: fn($query, $direction) => $query->orderByRaw("CONCAT(first_name, ' ', last_name) {$direction}")),
-                TextColumn::make('gender')
-                    ->label(__('form.gender'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable(),
-                TextColumn::make('email')
-                    ->copyable()
-                    ->toggleable()
-                    ->copyMessage(__('Email copied'))
-                    ->label(__('form.email'))
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable(),
-                PhoneColumn::make('mobile_number')->displayFormat(PhoneInputNumberType::INTERNATIONAL)
-                    ->copyable()
-                    ->toggleable()
-                    ->copyMessage('mobile number copied')
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable(),
-                TextColumn::make('countryRelation.name')
-                    ->label(__('form.country'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable(),
-                TextColumn::make('stateRelation.name')
-                    ->label(__('form.city'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('company')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable(),
-                TextColumn::make('title')
-                    ->label(__('form.title'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('website')
-                    ->label(__('form.website'))
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('job_title')
-                    ->label(__('form.job_title'))
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                SelectFilter::make('exhibition_id')
-                    ->relationship(
-                        'exhibition',
-                        'name',
-                        modifyQueryUsing: fn ($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")->orderBy('name')
-                    )
-                    ->label(__('form.exhibition'))
-                    ->searchable()
-                    ->preload()
-                    ->indicateUsing(function (array $data): array {
-                        if (!$data['value']) {
-                            return [];
-                        }
-
-                        $exhibition = \App\Models\Association::find($data['value']);
-
-                        if (!$exhibition) {
-                            return [];
-                        }
-
-                        return [
-                            __('form.exhibition') . ': ' . $exhibition->name,
-                        ];
-                    }),
-
-
-                SelectFilter::make('sector_id')
-                    ->relationship('sector', 'name')
-                    ->label(__('form.sector'))
-                    ->searchable()
-                    ->preload(),
-
-                SelectFilter::make('resource_id')
-                    ->relationship('resource', 'name')
-                    ->label(__('form.resource'))
-                    ->searchable()
-                    ->preload(),
-
-                TextFilter::make('first_name')
-                    ->default(TextFilter::CLAUSE_CONTAIN)
-                    ->wrapperUsing(fn() => Group::make())
-                    ->enableClauseLabel(),
-                TextFilter::make('last_name')
-                    ->default(TextFilter::CLAUSE_CONTAIN)
-                    ->wrapperUsing(fn() => Group::make())
-                    ->enableClauseLabel(),
-                TextFilter::make('mobile_number')
-                    ->default(TextFilter::CLAUSE_CONTAIN)
-                    ->wrapperUsing(fn() => Group::make())
-                    ->enableClauseLabel(),
-                SelectFilter::make('country')
-                    ->label(__('form.country'))
-                    ->relationship('countryRelation', 'name')
-                    ->preload(),
-                SelectFilter::make('gender')
-                    ->label(__('form.gender'))
-                    ->options([
-                        'male' => __('form.male'),
-                        'female' => __('form.female'),
-                    ])
-            ], layout: FiltersLayout::Modal)
-            ->filtersFormColumns(3)
-            ->filtersFormSchema(fn(array $filters): array => [
-                // Organize filters into sections
-                Section::make()
-                    ->description()
-                    ->schema([
-                        Group::make([
-                            $filters['first_name'],
-                            $filters['last_name'],
-                            $filters['mobile_number'],
-                        ])->columns(3),
-                    ])
-                    ->columns(1),
-
-                Section::make()
-                    ->description()
-                    ->schema([
-                        Group::make([
-                            $filters['exhibition_id'],
-                            $filters['sector_id'],
-                            $filters['resource_id'],
-                        ])->columns(3),
-                    ])
-                    ->columns(1),
-
-                Section::make()
-                    ->description()
-                    ->schema([
-                        Group::make([
-                            $filters['country'],
-                            $filters['gender'],
-                        ])->columns(2),
-                    ])
-                    ->columns(1),
-
-            ])
-            ->actions([
-                ActionGroup::make([
-                    Tables\Actions\EditAction::make(),
-//                    SendEmailAction::make(),
-//                    SendSmsAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ])
-            ])
-            ->selectCurrentPageOnly()
-            ->paginated([5, 10, 25, 50, 100])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-//                    SendBulkEmailAction::make(),
-//                    SendBulkSmsAction::make(),
-                    DeleteBulkAction::make(),
-                ]),
-                BulkAction::make('deleteAll')
-                    ->label(fn($livewire) => __('Delete All ' . $livewire->getFilteredTableQuery()->count() . ' Records'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->deselectRecordsAfterCompletion()
-                    ->requiresConfirmation()
-                    ->action(function ($livewire) {
-                        if (method_exists($livewire, 'getFilteredTableQuery')) {
-                            $filteredQuery = $livewire->getFilteredTableQuery();
-                            $filteredQuery->delete();
-                        } else {
-                            Record::query()->delete();
-                        }
-                    })
-            ]);
     }
 
 
