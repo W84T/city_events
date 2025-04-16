@@ -7,6 +7,8 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\HtmlString;
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,5 +37,9 @@ class AppServiceProvider extends ServiceProvider
         <script>document.addEventListener("scroll-to-top", () => window.scrollTo(0, 0))</script>
             '),
         );
+
+        FilamentAsset::register([
+            Css::make('custom-filament', resource_path('css/custom-filament.css')),
+        ]);
     }
 }

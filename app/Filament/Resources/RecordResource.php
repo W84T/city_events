@@ -17,6 +17,7 @@ use Filament\Forms\Get;
 use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -26,6 +27,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Webbingbrasil\FilamentAdvancedFilter\Filters\TextFilter;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
@@ -95,9 +97,13 @@ class RecordResource extends Resource
                         isIndividual: true,
                         isGlobal: false,
                         query: function ($query, $search) {
-                            $search = urldecode(trim($search));
+
+                            $hiddenSpace = "\u{00A0}";
+
+                            $search = str_replace($hiddenSpace, ' ', $search);
+
                             $query->whereHas('exhibition', function ($q) use ($search) {
-                                $q->where('id', '=', $search);
+                                $q->where('name', '=', $search);
                             });
                         }
                     )
@@ -111,8 +117,11 @@ class RecordResource extends Resource
                         isIndividual: true,
                         isGlobal: false,
                         query: function ($query, $search) {
+                            $hiddenSpace = "\u{00A0}";
+
+                            $search = str_replace($hiddenSpace, ' ', $search);
                             $query->whereHas('sector', function ($q) use ($search) {
-                                $q->where('id', '=', $search);
+                                $q->where('name', '=', $search);
                             });
                         }
                     )
@@ -125,8 +134,11 @@ class RecordResource extends Resource
                         isIndividual: true,
                         isGlobal: false,
                         query: function ($query, $search) {
+                            $hiddenSpace = "\u{00A0}";
+
+                            $search = str_replace($hiddenSpace, ' ', $search);
                             $query->whereHas('resource', function ($q) use ($search) {
-                                $q->where('id', '=', $search);
+                                $q->where('name', '=', $search);
                             });
                         }
                     )
@@ -237,9 +249,8 @@ class RecordResource extends Resource
                                         ->filter()
                                         ->toArray();
                                 }),
-                        ])->columns(3) // ✅ هنا الصح، تقسيم الأعمدة للـ Group كله
+                        ])->columns(3)
                     ])
-
                     ->query(function ($query, array $data) {
                         if ($data['exhibition_id'] ?? null) {
                             $query->where('exhibition_id', $data['exhibition_id']);
@@ -278,7 +289,6 @@ class RecordResource extends Resource
                                 $indicators[] = __('form.resource') . ': ' . $resource->name;
                             }
                         }
-
                         return $indicators;
                     }),
 
@@ -348,6 +358,11 @@ class RecordResource extends Resource
                     ])
                     ->columns(1),
             ])
+            ->filtersTriggerAction(
+                fn(Action $action) => $action
+                    ->button()
+                    ->label('Filter'),
+            )
             ->actions([
                 ActionGroup::make([
                     Tables\Actions\EditAction::make(),

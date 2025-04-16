@@ -955,13 +955,19 @@
                                         @switch($columnName)
                                             @case('exhibition.name')
                                                 @php
+                                                    $hiddenSpace = "\u{00A0}";
 
                                                     $options = Association::where('type', 'exhibition')
-                                                  ->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")
-                                                  ->orderBy('name')
-                                                  ->pluck('name', 'id')
-                                                  ->toArray();
+                                                        ->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")
+                                                        ->orderBy('name')
+                                                        ->pluck('name', 'name')
+                                                        ->mapWithKeys(function ($value, $key) use ($hiddenSpace) {
+                                                            $encoded = str_replace(' ', $hiddenSpace, $value);  // replace spaces with hidden character
+                                                            return [$encoded => $value];  // use hidden-spaced version as key, but show original label
+                                                        })
+                                                        ->toArray();
                                                 @endphp
+
                                                 <x-filament-tables::select-search-field
                                                     :debounce="$searchDebounce"
                                                     :on-blur="$isSearchOnBlur"
@@ -972,7 +978,13 @@
 
                                             @case('sector.name')
                                                 @php
-                                                    $options = Association::where('type', 'sector')->pluck('name', 'id')->toArray();
+                                                    $options = Association::where('type', 'sector')
+                                                      ->pluck('name', 'name')
+                                                      ->mapWithKeys(function ($value, $key) use ($hiddenSpace) {
+                                                          $encoded = str_replace(' ', $hiddenSpace, $value);
+                                                          return [$encoded => $value];
+                                                      })
+                                                      ->toArray();
                                                 @endphp
 
                                                 <x-filament-tables::select-search-field
@@ -985,7 +997,13 @@
 
                                             @case('resource.name')
                                                 @php
-                                                    $options = Association::where('type', 'resource')->pluck('name', 'id')->toArray();
+                                                    $options = Association::where('type', 'resource')
+                                                    ->pluck('name', 'name')
+                                                    ->mapWithKeys(function ($value, $key) use ($hiddenSpace) {
+                                                          $encoded = str_replace(' ', $hiddenSpace, $value);
+                                                          return [$encoded => $value];
+                                                    })
+                                                    ->toArray();
                                                 @endphp
 
                                                 <x-filament-tables::select-search-field

@@ -1,0 +1,4 @@
+
+button[wire\:click="resetTableFiltersForm"] {
+    display: none !important;
+}
