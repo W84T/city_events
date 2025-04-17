@@ -41,5 +41,6 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Css::make('custom-filament', resource_path('css/custom-filament.css')),
         ]);
+
     }
 }

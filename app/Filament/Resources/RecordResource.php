@@ -399,7 +399,9 @@ class RecordResource extends Resource
                             Record::query()->delete();
                         }
                     })
-            ]);
+            ])
+            ->deferLoading()
+            ->striped();
     }
 
     public static function form(Form $form): Form

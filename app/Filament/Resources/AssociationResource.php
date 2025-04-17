@@ -14,12 +14,15 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+
 class AssociationResource extends Resource
 {
     protected static ?string $model = Association::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-link';
     protected static ?int $navigationSort = 2;
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -74,11 +77,6 @@ class AssociationResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultGroup(
-                Tables\Grouping\Group::make('type')
-                    ->label(__('form.type'))
-                    ->collapsible()
-            )
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
                     ->options([
