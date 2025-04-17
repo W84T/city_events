@@ -195,6 +195,11 @@ class RecordResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->toggleColumnsTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Toggle columns'),
+            )
             ->filters([
                 Filter::make('exhibition_filter')
                     ->form([
@@ -325,6 +330,7 @@ class RecordResource extends Resource
                         'female' => __('form.female'),
                     ]),
             ], layout: FiltersLayout::Modal)
+            ->deferFilters()
             ->filtersFormColumns(4)
             ->filtersFormSchema(fn(array $filters): array => [
                 Section::make()
