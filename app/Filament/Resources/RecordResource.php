@@ -206,6 +206,7 @@ class RecordResource extends Resource
                         Group::make([
                             Select::make('exhibition_id')
                                 ->label(__('form.exhibition'))
+                                ->live()
                                 ->options(
                                     Association::query()
                                         ->where('type', 'exhibition')
