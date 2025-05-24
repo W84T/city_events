@@ -84,6 +84,19 @@ class RecordImporter extends Importer
 
             ImportColumn::make('phone')
                 ->requiredMapping()
+                 ->castStateUsing(function ($state) {
+                    // If empty, return null
+                    if (blank($state)) {
+                        return null;
+                    }
+
+                    // If it's a string with multiple phone numbers separated by '|', split into array
+                    $phones = is_array($state) ? $state : explode(',', $state);
+
+                    return array_map(function ($item) {
+                        return ['number' => trim($item)];
+                    }, $phones);
+                 })
                 ->guess(['Phone 1 ', 'phone', 'phone 1']),
         ];
     }
@@ -114,21 +127,19 @@ class RecordImporter extends Importer
 
         $this->validateAndProcessPhoneNumbers();
         $this->validateEmail();
-        // Use phone as fallback if mobile_number is empty and phone is valid
-        if (empty($this->data['mobile_number']) && !empty($this->data['phone'])) {
-            $this->data['mobile_number'] = $this->data['phone'];
-        }
+
 
         if (empty($this->data['email']) && empty($this->data['mobile_number'])) {
             throw new RowImportFailedException("Email or Phone must be valid");
         }
 
         return empty($this->data['email']) ? new Record() : Record::firstOrNew(['email' => $this->data['email']]);
+//        $this->transformPhoneField();
     }
 
     protected function validateAndProcessPhoneNumbers(): void
     {
-        $phoneFields = ['mobile_number', 'phone'];
+        $phoneFields = ['mobile_number'];
 
         foreach ($phoneFields as $field) {
             if (!empty($this->data[$field])) {
@@ -185,7 +196,7 @@ class RecordImporter extends Importer
 
     protected function isEmptyRow(): bool
     {
-        $requiredFields = ['sector', 'resource', 'exhibition', 'title', 'first_name', 'last_name', 'email', 'mobile_number', 'country'];
+        $requiredFields = ['sector', 'resource', 'exhibition', 'title', 'first_name', 'last_name', 'email', 'mobile_number', 'country', 'phone'];
         return collect($requiredFields)->every(fn($field) => empty($this->data[$field]));
     }
 
@@ -229,6 +240,16 @@ class RecordImporter extends Importer
 
         return $newAssociation->id;
     }
+
+    protected function transformPhoneField(): void
+    {
+        if (!empty($this->data['phone']) && is_array($this->data['phone'])) {
+            $this->data['phone'] = array_map(function ($item) {
+                return ['number' => trim($item)];
+            }, $this->data['phone']);
+        }
+    }
+
 
     protected function isLikelyFakeNumber(string $number): bool
     {

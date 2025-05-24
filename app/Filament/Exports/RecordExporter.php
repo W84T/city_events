@@ -32,7 +32,7 @@ class RecordExporter extends Exporter
             ExportColumn::make('phone')
                 ->formatStateUsing(function ($state) {
                     // Convert JSON array to comma-separated string
-                    return is_array($state) ? implode(', ', $state) : '';
+                    return is_array($state) ? implode(',', $state) : '';
                 }),
             ExportColumn::make('company'),
             ExportColumn::make('job_title'),
