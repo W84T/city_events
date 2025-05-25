@@ -167,6 +167,28 @@ class RecordResource extends Resource
                     ->copyMessage('mobile number copied')
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->sortable(),
+               TextColumn::make('phone')
+                    ->toggleable()
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable()
+                   ->formatStateUsing(function ($state) {
+                        // Case 1: It's already an array of arrays
+                        if (is_array($state)) {
+                            return $state[0]['number'] ?? '-';
+                        }
+
+                        // Case 2: It's a string
+                        if (is_string($state)) {
+                            $state = '[' . $state . ']';
+                            $decoded = json_decode($state, true);
+
+                            if (is_array($decoded)) {
+                                return $decoded[0]['number'] ?? '-';
+                            }
+                        }
+
+                        return '-';
+                    }),
                 TextColumn::make('countryRelation.name')
                     ->label(__('form.country'))
                     ->toggleable(isToggledHiddenByDefault: true)
