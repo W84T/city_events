@@ -15,6 +15,7 @@
         "laravel/tinker": "^2.9",
         "twilio/sdk": "^8.3",
         "webbingbrasil/filament-advancedfilter": "3.0",
+        "giggsey/libphonenumber-for-php": "^8.12",
         "ysfkaya/filament-phone-input": "^3.1"
     },
     "require-dev": {

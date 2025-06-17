@@ -165,12 +165,12 @@ class RecordResource extends Resource
                     ->label(__('form.email'))
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->sortable(),
-//                PhoneColumn::make('mobile_number')->displayFormat(PhoneInputNumberType::INTERNATIONAL)
-//                    ->copyable()
-//                    ->toggleable()
-//                    ->copyMessage('mobile number copied')
-//                    ->searchable(isIndividual: true, isGlobal: false)
-//                    ->sortable(),
+                PhoneColumn::make('mobile_number')->displayFormat(PhoneInputNumberType::INTERNATIONAL)
+                    ->copyable()
+                    ->toggleable()
+                    ->copyMessage('mobile number copied')
+                    ->searchable(isIndividual: true, isGlobal: false)
+                    ->sortable(),
                TextColumn::make('phone')
                     ->toggleable()
                     ->searchable(isIndividual: true, isGlobal: false)
