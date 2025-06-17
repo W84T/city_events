@@ -12,6 +12,7 @@ use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Propaganistas\LaravelPhone\Rules\Phone;
 use Filament\Forms\Components\Actions\Action as FormAction;
@@ -62,7 +63,6 @@ class RecordImporter extends Importer
                 ->requiredMapping()
                 ->rules([
                     'nullable',
-                    'unique:records,mobile_number',
                 ])
                 ->guess(['Mobile ', 'mobile_number', 'Mobile Number']),
 
@@ -125,16 +125,28 @@ class RecordImporter extends Importer
         $this->data['resource_id'] = $this->resolveAssociationId($this->data['resource_id'], 'resource');
         $this->data['exhibition_id'] = $this->resolveAssociationId($this->data['exhibition_id'], 'exhibition');
 
-        $this->validateAndProcessPhoneNumbers();
-        $this->validateEmail();
+        $this->validateAndProcessPhoneNumbers(); // formats & validates mobile number
+        $this->validateEmail(); // formats & validates email
 
+        $email = $this->data['email'] ?? null;
+        $mobile = $this->data['mobile_number'] ?? null;
 
-        if (empty($this->data['email']) && empty($this->data['mobile_number'])) {
-            throw new RowImportFailedException("Email or Phone must be valid");
+        $emailExists = $email ? Record::where('email', $email)->exists() : false;
+        $mobileExists = $mobile ? Record::where('mobile_number', $mobile)->exists() : false;
+
+        if ($email && !$emailExists && $mobile && !$mobileExists) {
+            // both unique → use both
+        } elseif ($email && !$emailExists && (!$mobile || $mobileExists)) {
+            $this->data['mobile_number'] = null;
+        } elseif ($mobile && !$mobileExists && (!$email || $emailExists)) {
+            $this->data['email'] = null;
+        } else {
+            throw new RowImportFailedException("Email and Mobile Number already exist or are invalid.");
         }
 
-        return empty($this->data['email']) ? new Record() : Record::firstOrNew(['email' => $this->data['email']]);
-//        $this->transformPhoneField();
+        return $this->data['email']
+            ? Record::firstOrNew(['email' => $this->data['email']])
+            : new Record();
     }
 
     protected function validateAndProcessPhoneNumbers(): void
@@ -143,8 +155,19 @@ class RecordImporter extends Importer
 
         foreach ($phoneFields as $field) {
             if (!empty($this->data[$field])) {
-                $this->data[$field] = trim(explode("\n", $this->data[$field])[0]);
-                $this->data[$field] = trim($this->data[$field]);
+                // Take first line if multiline
+                $number = trim(explode("\n", $this->data[$field])[0]);
+
+                // Clean number: remove everything except digits and plus
+                $number = preg_replace('/[^\d+]/', '', $number);
+
+                // Replace multiple leading pluses with one plus
+                $number = preg_replace('/^\++/', '+', $number);
+
+                // Update the cleaned number back to data
+                $this->data[$field] = $number;
+
+                // Now apply your existing logic:
                 if (!str_starts_with($this->data[$field], '+')) {
                     if (preg_match('/^5\d{8}$/', $this->data[$field])) {
                         $this->data[$field] = '+966' . $this->data[$field];
@@ -176,20 +199,34 @@ class RecordImporter extends Importer
         }
     }
 
+
     protected function validateEmail(): void
     {
         if (!empty($this->data['email'])) {
-            $email = $this->data['email'];
+            // Remove Unicode spaces (e.g., non-breaking space)
+            $email = preg_replace('/^\s+|\s+$/u', '', $this->data['email']);
 
-            $isValid = Validator::make(
+            // Create the validator instance
+            $validator = Validator::make(
                 ['email' => $email],
                 ['email' => ['email', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/']]
-            )->passes();
+            );
 
+            $isValid = $validator->passes();
             $isUnique = !Record::where('email', $email)->exists();
 
             if (!$isValid || !$isUnique) {
+                if (!$isValid) {
+                    Log::warning("Email validation failed for '{$email}':", $validator->errors()->all());
+                }
+
+                if (!$isUnique) {
+                    Log::warning("Email '{$email}' is already taken.");
+                }
+
                 $this->data['email'] = null;
+            } else {
+                $this->data['email'] = $email;
             }
         }
     }
