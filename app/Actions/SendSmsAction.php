@@ -2,11 +2,11 @@
 
 namespace App\Actions;
 
+use Filament\Actions\Action;
 use App\Services\MoraSMSService;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\Action;
 
 class SendSmsAction
 {
@@ -17,7 +17,7 @@ class SendSmsAction
             ->icon('heroicon-o-chat-bubble-bottom-center-text')
             ->modalHeading('Compose SMS')
             ->modalSubmitActionLabel('Send SMS')
-            ->form([
+            ->schema([
                 MarkdownEditor::make('instructions')
                     ->label(__('Placeholder Instructions'))
                     ->default("You can use the following placeholders in your email:\n\n" .

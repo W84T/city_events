@@ -2,7 +2,8 @@
 
 namespace App\Jobs;
 
-use Filament\Notifications\Actions\Action;
+use Exception;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -48,7 +49,7 @@ class SendBulkEmailJob implements ShouldQueue
                 });
 
                 $successCount++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $failedEmails[] = ['email' => $email, 'error' => $e->getMessage()];
             }
         }

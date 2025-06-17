@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 class ResourceBarChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Resource Bar Chart';
+//    protected ?string $heading = 'Resource Bar Chart';
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $maxHeight = '500px';
+//    protected ?string $maxHeight = '500px';
 
     protected function getOptions(): array
     {

@@ -34,7 +34,7 @@
             0 => null,
             1 => 'ring-1',
             2 => 'ring-2',
-            3 => 'ring',
+            3 => 'ring-3',
             4 => 'ring-4',
             default => $ring,
         },

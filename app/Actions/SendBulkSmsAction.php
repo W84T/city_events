@@ -2,11 +2,11 @@
 
 namespace App\Actions;
 
+use Filament\Actions\BulkAction;
 use App\Services\MoraSMSService;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\BulkAction;
 
 class SendBulkSmsAction
 {

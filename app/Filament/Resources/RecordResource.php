@@ -2,37 +2,41 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RecordResource\Pages;
+use App\Filament\Resources\RecordResource\Pages\ListRecords;
+use App\Filament\Resources\RecordResource\Pages\CreateRecord;
+use App\Filament\Resources\RecordResource\Pages\EditRecord;
 use App\Models\Association;
 use App\Models\Record;
 use App\Models\State;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
+use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Webbingbrasil\FilamentAdvancedFilter\Filters\TextFilter;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
-
 
 class RecordResource extends Resource
 
@@ -53,9 +57,9 @@ class RecordResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRecords::route('/'),
-            'create' => Pages\CreateRecord::route('/create'),
-            'edit' => Pages\EditRecord::route('/{record}/edit'),
+            'index' => ListRecords::route('/'),
+            'create' => CreateRecord::route('/create'),
+            'edit' => EditRecord::route('/{record}/edit'),
         ];
     }
 
@@ -161,12 +165,12 @@ class RecordResource extends Resource
                     ->label(__('form.email'))
                     ->searchable(isIndividual: true, isGlobal: false)
                     ->sortable(),
-                PhoneColumn::make('mobile_number')->displayFormat(PhoneInputNumberType::INTERNATIONAL)
-                    ->copyable()
-                    ->toggleable()
-                    ->copyMessage('mobile number copied')
-                    ->searchable(isIndividual: true, isGlobal: false)
-                    ->sortable(),
+//                PhoneColumn::make('mobile_number')->displayFormat(PhoneInputNumberType::INTERNATIONAL)
+//                    ->copyable()
+//                    ->toggleable()
+//                    ->copyMessage('mobile number copied')
+//                    ->searchable(isIndividual: true, isGlobal: false)
+//                    ->sortable(),
                TextColumn::make('phone')
                     ->toggleable()
                     ->searchable(isIndividual: true, isGlobal: false)
@@ -217,11 +221,11 @@ class RecordResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->toggleColumnsTriggerAction(
-                fn (Action $action) => $action
-                    ->button()
-                    ->label('Toggle columns'),
-            )
+//            ->toggleColumnsTriggerAction(
+//                fn (Action $action) => $action
+//                    ->button()
+//                    ->label('Toggle columns'),
+//            )
             ->filters([
                 Filter::make('exhibition_filter')
                     ->form([
@@ -387,23 +391,24 @@ class RecordResource extends Resource
                     ])
                     ->columns(1),
             ])
-            ->filtersTriggerAction(
-                fn(Action $action) => $action
-                    ->button()
-                    ->label('Filter'),
-            )
+//            ->filtersApplyAction(
+//                fn(Action $action) => $action
+//                    ->link()
+//                    ->label('Filter'),
+//            )
+
             ->actions([
                 ActionGroup::make([
-                    Tables\Actions\EditAction::make(),
+                    EditAction::make(),
 //                    SendEmailAction::make(),
 //                    SendSmsAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    DeleteAction::make(),
                 ])
             ])
             ->selectCurrentPageOnly()
             ->paginated([5, 10, 25, 50, 100])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                BulkActionGroup::make([
 //                    SendBulkEmailAction::make(),
 //                    SendBulkSmsAction::make(),
                     DeleteBulkAction::make(),
@@ -430,7 +435,7 @@ class RecordResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
+            ->components([
                 Group::make()->schema([
                     Section::make(__('form.association'))
                         ->columns(3)

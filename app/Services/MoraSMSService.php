@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -61,7 +62,7 @@ class MoraSMSService
                 'success' => false,
                 'message' => "Failed to send SMS. HTTP Error",
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Mora SMS Exception: " . $e->getMessage());
             return [
                 'success' => false,
@@ -94,7 +95,7 @@ class MoraSMSService
 
             Log::error("Mora Balance Check Failed: " . $response->body());
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Mora Balance Check Exception: " . $e->getMessage());
             return false;
         }

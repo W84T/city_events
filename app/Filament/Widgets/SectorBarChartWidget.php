@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 class SectorBarChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Sector Bar Chart';
+//    protected ?string $heading = 'Sector Bar Chart';
     protected int|string|array $columnSpan = '8';
-    protected static ?string $maxHeight = '400px';
+//    protected ?string $maxHeight = '400px';
     protected function getOptions(): array
     {
         return [

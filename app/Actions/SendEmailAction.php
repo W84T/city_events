@@ -2,6 +2,9 @@
 
 namespace App\Actions;
 
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\MarkdownEditor;
 use App\Jobs\SendEmailJob;
 use Exception;
 use Filament\Forms\Components\RichEditor;
@@ -9,7 +12,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\View;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\Action;
 
 class SendEmailAction
 {
@@ -21,11 +23,11 @@ class SendEmailAction
             ->icon('heroicon-o-envelope')
             ->modalHeading('Compose Email')
             ->modalSubmitActionLabel('Send')
-            ->form([
-                \Filament\Forms\Components\Section::make(__('How to Use Placeholders'))
+            ->schema([
+                Section::make(__('How to Use Placeholders'))
                     ->collapsed()
                     ->schema([
-                        \Filament\Forms\Components\MarkdownEditor::make('instructions')
+                        MarkdownEditor::make('instructions')
                             ->label(false)
                             ->default("You can use the following placeholders in your email:\n\n" .
                                 "- **{title}** → Title\n" .

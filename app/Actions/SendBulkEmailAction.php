@@ -2,13 +2,15 @@
 
 namespace App\Actions;
 
+use Filament\Actions\BulkAction;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\MarkdownEditor;
 use App\Jobs\SendBulkEmailJob;
 use Exception;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\BulkAction;
 
 class SendBulkEmailAction
 {
@@ -20,10 +22,10 @@ class SendBulkEmailAction
             ->modalHeading('Compose Bulk Email')
             ->modalSubmitActionLabel('Send Emails')
             ->form([
-                \Filament\Forms\Components\Section::make(__('How to Use Placeholders'))
+                Section::make(__('How to Use Placeholders'))
                     ->collapsed()
                     ->schema([
-                        \Filament\Forms\Components\MarkdownEditor::make('instructions')
+                        MarkdownEditor::make('instructions')
                             ->label(false)
                             ->default("You can use the following placeholders in your email:\n\n" .
                                 "- **{title}** → Title\n" .

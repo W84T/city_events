@@ -289,7 +289,7 @@
             @endif
             @class([
                 'fi-ta-content relative divide-y divide-gray-200 overflow-x-auto dark:divide-white/10 dark:border-t-white/10',
-                '!border-t-0' => ! $hasHeader,
+                'border-t-0!' => ! $hasHeader,
             ])
         >
             @if (($content || $hasColumnsLayout) && ($records !== null) && count($records))
@@ -499,7 +499,7 @@
                                     'fi-ta-record relative h-full bg-white transition duration-75 dark:bg-gray-900',
                                     'hover:bg-gray-50 dark:hover:bg-white/5' => ($recordUrl || $recordAction) && (! $contentGrid),
                                     'hover:bg-gray-50 dark:hover:bg-white/10 dark:hover:ring-white/20' => ($recordUrl || $recordAction) && $contentGrid,
-                                    'rounded-xl shadow-sm ring-1 ring-gray-950/5 dark:bg-white/5 dark:ring-white/10' => $contentGrid,
+                                    'rounded-xl shadow-xs ring-1 ring-gray-950/5 dark:bg-white/5 dark:ring-white/10' => $contentGrid,
                                     ...$getRecordClasses($record),
                                 ])
                                 x-bind:class="{
@@ -739,7 +739,7 @@
                                             colspan="{{ $columnGroupColumnsCount }}"
                                             {{
                                                 $columnGroup->getExtraHeaderAttributeBag()->class([
-                                                    'fi-table-header-group-cell border-gray-200 px-3 py-2 dark:border-white/5 sm:first-of-type:ps-6 sm:last-of-type:pe-6 [&:not(:first-of-type)]:border-s [&:not(:last-of-type)]:border-e',
+                                                    'fi-table-header-group-cell border-gray-200 px-3 py-2 dark:border-white/5 sm:first-of-type:ps-6 sm:last-of-type:pe-6 not-first-of-type:border-s not-last-of-type:border-e',
                                                 ])
                                             }}
                                         >

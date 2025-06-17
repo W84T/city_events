@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -47,7 +48,7 @@ class SendEmailJob implements ShouldQueue
                 ->body(__('The email has been sent successfully to ') . $this->email)
                 ->sendToDatabase($this->user);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log the error and send a failure notification
             Log::error("Failed to send email to {$this->email}: " . $e->getMessage());
 

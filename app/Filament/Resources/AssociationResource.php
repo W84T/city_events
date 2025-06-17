@@ -2,18 +2,29 @@
 
 namespace App\Filament\Resources;
 
+
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\EditAction;
+use Filament\Forms\Form;
+
+use Filament\Notifications\Notification;
+use App\Filament\Resources\AssociationResource\Pages\ListAssociations;
+use App\Filament\Resources\AssociationResource\Pages\CreateAssociation;
+use App\Filament\Resources\AssociationResource\Pages\EditAssociation;
 use App\Filament\Resources\AssociationResource\Pages;
 use App\Models\Association;
 use App\Models\Record;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -22,12 +33,13 @@ class AssociationResource extends Resource
 {
     protected static ?string $model = Association::class;
     protected static ?string $navigationIcon = 'heroicon-o-link';
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
+            ->components([
                 Group::make()->schema([
                     Section::make()->schema([
                         Select::make('type')
@@ -59,39 +71,39 @@ class AssociationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label(__('form.name'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('other_info')
+                TextColumn::make('other_info')
                     ->label(__('form.other_info'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label(__('form.type'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type')
+                SelectFilter::make('type')
                     ->options([
                         'exhibition' => __('form.exhibition'),
                         'resource' => __('form.resource'),
                         'sector' => __('form.sector'),
                     ]),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     BulkAction::make('merge')
                         ->label(__('Merge'))
                         ->requiresConfirmation()
@@ -110,7 +122,7 @@ class AssociationResource extends Resource
                             $types = $records->pluck('type')->unique();
 
                             if ($types->count() > 1) {
-                                \Filament\Notifications\Notification::make()
+                                Notification::make()
                                     ->title('Merge Failed')
                                     ->danger()
                                     ->body('All selected associations must be of the same type.')
@@ -124,7 +136,7 @@ class AssociationResource extends Resource
                             $targetId = $data['target_id'];
 
                             if (! $records->pluck('id')->contains($targetId)) {
-                                \Filament\Notifications\Notification::make()
+                                Notification::make()
                                     ->title('Invalid Target')
                                     ->danger()
                                     ->body('Selected target is not among the selected associations.')
@@ -147,7 +159,7 @@ class AssociationResource extends Resource
                             $recordsToDelete = $records->where('id', '!=', $targetId);
                             Association::destroy($recordsToDelete->pluck('id'));
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Associations Merged')
                                 ->success()
                                 ->body("Merged " . $recordsToDelete->count() . " associations into '{$records->find($targetId)?->name}'")
@@ -168,9 +180,9 @@ class AssociationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAssociations::route('/'),
-            'create' => Pages\CreateAssociation::route('/create'),
-            'edit' => Pages\EditAssociation::route('/{record}/edit'),
+            'index' => ListAssociations::route('/'),
+            'create' => CreateAssociation::route('/create'),
+            'edit' => EditAssociation::route('/{record}/edit'),
         ];
     }
 

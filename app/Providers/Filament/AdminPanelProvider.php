@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
 use App\Filament\Resources\RecordResource;
 use App\Filament\Widgets\ExhibitionPieChartWidget;
 use App\Filament\Widgets\ResourceBarChartWidget;
@@ -50,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
                     ->activeIcon('heroicon-s-home')
                     ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.dashboard'))
                     ->sort(3)
-                    ->url(fn () => Pages\Dashboard::getUrl()),
+                    ->url(fn () => Dashboard::getUrl()),
             ])
             ->maxContentWidth('full')
             ->brandLogoHeight('4rem')

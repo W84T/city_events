@@ -8,11 +8,10 @@ use App\Filament\Resources\RecordResource;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords as BaseListRecords;
-use Filament\Tables\Actions\ImportAction as ImportTableAction;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString; 
+use Illuminate\Support\HtmlString;
 
 class ListRecords extends BaseListRecords
 {
@@ -28,7 +27,7 @@ class ListRecords extends BaseListRecords
                 ->color('primary'),
 ImportAction::make()
     ->importer(RecordImporter::class)
-    ->modalDescription(function (ImportAction | ImportTableAction $action): Htmlable {
+    ->modalDescription(function (ImportAction  $action): Htmlable {
         return new HtmlString(
             Blade::render('filament.import-modal-description', [
                 'downloadExampleAction' => $action->getModalAction('downloadExample'),
