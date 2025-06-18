@@ -442,6 +442,11 @@ class RecordResource extends Resource
                                     modifyQueryUsing: fn($query) => $query->orderByRaw("CASE WHEN name = 'other' THEN 2 WHEN name = 'SFDA' THEN 1 ELSE 0 END")->orderBy('name'))
                                 ->searchable()
                                 ->preload()
+                                ->live()
+                                ->afterStateUpdated(function ($state, \Filament\Forms\Set $set) {
+                                    $set('sector_id', null);
+                                    $set('resource_id', null);
+                                })
                                 ->label(__('form.exhibition'))
                                 ->createOptionForm([
                                     TextInput::make('name')->label(__('form.name'))->maxLength(255),
@@ -458,6 +463,21 @@ class RecordResource extends Resource
                                 ->relationship('resource', 'name')
                                 ->searchable()
                                 ->preload()
+                                ->options(function ($get) {
+                                    $exhibitionId = $get('exhibition_id');
+                                    if (!$exhibitionId) return [];
+                                    return Record::query()
+                                        ->where('exhibition_id', $exhibitionId)
+                                        ->select('resource_id')
+                                        ->distinct()
+                                        ->with('resource')
+                                        ->get()
+                                        ->mapWithKeys(function ($record) {
+                                            return [$record->resource_id => optional($record->resource)->name];
+                                        })
+                                        ->filter()
+                                        ->toArray();
+                                })
                                 ->label(__('form.resource'))
                                 ->createOptionForm([
                                     TextInput::make('name')->label(__('form.name'))->maxLength(255),
@@ -475,6 +495,23 @@ class RecordResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->label(__('form.sector'))
+                                ->options(function ($get) {
+                                    $exhibitionId = $get('exhibition_id');
+
+                                    if (!$exhibitionId) return [];
+
+                                    return Record::query()
+                                        ->where('exhibition_id', $exhibitionId)
+                                        ->select('sector_id')
+                                        ->distinct()
+                                        ->with('sector')
+                                        ->get()
+                                        ->mapWithKeys(function ($record) {
+                                            return [$record->sector_id => optional($record->sector)->name];
+                                        })
+                                        ->filter()
+                                        ->toArray();
+                                })
                                 ->createOptionForm([
                                     TextInput::make('name')->label(__('form.name'))->maxLength(255),
                                     TextInput::make('other_info')->label(__('form.other_info'))->maxLength(255),
