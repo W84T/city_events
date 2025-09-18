@@ -31,7 +31,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->databaseNotifications()
             ->login()
             ->colors([
@@ -53,8 +53,9 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->brandLogoHeight('4rem')
+            ->brandName('City Events')
+            ->favicon(asset('storage/favicon.ico'))
             ->brandLogo(asset('storage/logo.svg'))
-            ->favicon(asset('storage/favicon.svg'))
             ->darkModeBrandLogo(asset('storage/logo_white.svg'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
