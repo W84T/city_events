@@ -7,15 +7,15 @@ use App\Models\Country;
 use App\Models\Record;
 use App\Models\State;
 use App\Rules\SaudiPhoneNumber;
-use Carbon\CarbonInterface;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Number;
 use Propaganistas\LaravelPhone\Rules\Phone;
-use Filament\Forms\Components\Actions\Action as FormAction;
+
 class RecordImporter extends Importer
 {
     protected static ?string $model = Record::class;
@@ -36,15 +36,12 @@ class RecordImporter extends Importer
                 ->guess(['Exhibition', 'exhibition', 'Exhibition Name']),
 
             ImportColumn::make('title')
-                ->requiredMapping()
                 ->guess(['Title ', 'title', 'title']),
 
             ImportColumn::make('first_name')
-                ->requiredMapping()
                 ->guess(['F Name ', 'first_name']),
 
             ImportColumn::make('last_name')
-                ->requiredMapping()
                 ->guess(['L Name ', 'last_name']),
 
             ImportColumn::make('gender')
@@ -84,7 +81,7 @@ class RecordImporter extends Importer
 
             ImportColumn::make('phone')
                 ->requiredMapping()
-                 ->castStateUsing(function ($state) {
+                ->castStateUsing(function ($state) {
                     // If empty, return null
                     if (blank($state)) {
                         return null;
@@ -96,7 +93,7 @@ class RecordImporter extends Importer
                     return array_map(function ($item) {
                         return ['number' => trim($item)];
                     }, $phones);
-                 })
+                })
                 ->guess(['Phone 1 ', 'phone', 'phone 1']),
         ];
     }
@@ -135,7 +132,8 @@ class RecordImporter extends Importer
         $mobileExists = $mobile ? Record::where('mobile_number', $mobile)->exists() : false;
 
         if ($email && !$emailExists && $mobile && !$mobileExists) {
-            // both unique → use both
+            $this->data['mobile_number'] = $mobile;
+            $this->data['email'] = $email;
         } elseif ($email && !$emailExists && (!$mobile || $mobileExists)) {
             $this->data['mobile_number'] = null;
         } elseif ($mobile && !$mobileExists && (!$email || $emailExists)) {
@@ -312,5 +310,4 @@ class RecordImporter extends Importer
 
         return false;
     }
-
 }

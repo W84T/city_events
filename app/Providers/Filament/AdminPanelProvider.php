@@ -2,24 +2,27 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Resources\RecordResource;
-use App\Filament\Widgets\ExhibitionPieChartWidget;
-use App\Filament\Widgets\ResourceBarChartWidget;
-use App\Filament\Widgets\SectorBarChartWidget;
+
+use App\Filament\Resources\Records\RecordResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationItem;
-use Filament\Pages;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
+use ToneGabes\Filament\Icons\Enums\Phosphor;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,32 +31,9 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('')
+            ->path('admin')
             ->databaseNotifications()
-            ->sidebarCollapsibleOnDesktop()
-
             ->login()
-            ->profile()
-            ->brandName('City Events')
-            ->brandLogo(asset('storage/logo.svg'))
-            ->favicon(asset('storage/favicon.svg'))
-            ->darkModeBrandLogo(asset('storage/logo_white.svg'))
-            ->navigationItems([
-                NavigationItem::make('Add Record')
-                    ->icon('heroicon-o-plus-circle')
-                    ->activeIcon('heroicon-s-plus-circle')
-                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.records.create'))
-                    ->sort(1)
-                    ->url(fn () => RecordResource::getUrl('create')),
-                NavigationItem::make('Dashboard')
-                    ->icon('heroicon-o-home')
-                    ->activeIcon('heroicon-s-home')
-                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.dashboard'))
-                    ->sort(3)
-                    ->url(fn () => Pages\Dashboard::getUrl()),
-            ])
-            ->maxContentWidth('full')
-            ->brandLogoHeight('4rem')
             ->colors([
                 'primary' => [
                     50 => '255, 218, 233',   // Very light pinkish tone
@@ -68,14 +48,23 @@ class AdminPanelProvider extends PanelProvider
                     900 => '90, 0, 47',       // Almost a wine-like shade
                     950 => '60, 0, 31',       // Very dark, close to burgundy
                 ],
+//                "gray" => Color::Stone,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([])
+            ->sidebarCollapsibleOnDesktop()
+            ->maxContentWidth('full')
+            ->brandLogoHeight('4rem')
+            ->brandLogo(asset('storage/logo.svg'))
+            ->favicon(asset('storage/favicon.svg'))
+            ->darkModeBrandLogo(asset('storage/logo_white.svg'))
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->pages([
+//                Dashboard::class,
+            ])
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                ExhibitionPieChartWidget::class,
-                SectorBarChartWidget::class,
-                ResourceBarChartWidget::class,
+                AccountWidget::class,
+                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -90,6 +79,18 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->plugins([
+                FilamentApexChartsPlugin::make()
+            ])
+            ->navigationItems([
+                NavigationItem::make('Add Record')
+                    ->icon(Phosphor::PlusCircle)
+                    ->activeIcon(Phosphor::PlusCircleDuotone)
+                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.records.create'))
+                    ->sort(1)
+                    ->url(fn () => RecordResource::getUrl('create')),
+            ])
+            ->viteTheme('resources/css/filament/admin/theme.css');
     }
 }

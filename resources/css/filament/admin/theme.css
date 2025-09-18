@@ -1,0 +1,106 @@
+    @import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+    /* If you're on Tailwind v4, keep your @source lines for class scanning */
+    @source "../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php";
+    @source "../../../../vendor/guava/filament-modal-relation-managers/resources/**/*.blade.php";
+    @source "../../../../vendor/mansoor/filament-versionable/resources/**/*.blade.php";
+    @source "../../../../app/Filament/**/*";
+    @source "../../../../resources/views/filament/**/*";
+    @source '../../../../vendor/awcodes/palette/resources/**/*.blade.php';
+
+    /*side bar*/
+    .fi-sidebar-item .fi-sidebar-item-btn {
+        @apply px-4;
+    }
+
+    .fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+        @apply bg-transparent dark:bg-primary-600;
+        @apply border-l-3 border-primary-600 rounded-none dark:rounded-lg
+    }
+
+    .fi-sidebar-item .fi-sidebar-item-btn{
+        @apply border-l-3 border-transparent;
+    }
+
+    .fi-sidebar-item.fi-active .fi-sidebar-item-label,
+    .fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+        @apply text-primary-700 dark:text-white;
+    }
+
+
+    .fi-sidebar-item.fi-active .fi-sidebar-item-badge-ctn .fi-badge {
+        @apply text-primary-900 dark:bg-gray-900/75 dark:text-white;
+    }
+
+    .fi-sidebar-item.fi-active .fi-sidebar-item-grouped-border .fi-sidebar-item-grouped-border-part-not-last,
+    .fi-sidebar-item.fi-active .fi-sidebar-item-grouped-border .fi-sidebar-item-grouped-border-part-not-first {
+        @apply bg-gray-900/25 dark:bg-white/25;
+    }
+
+    /* TODO: Implement this */
+    .fi-sidebar-group-dropdown-trigger-btn {
+        @apply rounded-3xl;
+    }
+
+    /*modal*/
+    .fi-modal-window {
+        @apply rounded-3xl;
+    }
+
+    .fi-modal-close-overlay {
+        @apply backdrop-blur-xs;
+    }
+
+    .fi-modal-slide-over .fi-modal-window {
+        @apply mt-2 me-4 h-[calc(100vh-2rem)];
+    }
+
+    /*panel*/
+    .fi-simple-main {
+        @apply rounded-3xl;
+    }
+
+    .fi-page-header-main-ctn .fi-header .fi-header-heading {
+        @apply relative inline-block after:content-[''] after:absolute after:-z-10 after:-left-1 after:-right-1 after:bottom-1 after:rounded-full after:bg-primary-400/75 dark:after:bg-primary-600/75 after:h-1.5;
+    }
+
+
+
+
+
+    @layer components {
+        /* === Sidebar === */
+        .fi-sidebar {
+            @apply overflow-hidden;
+            transition: width 300ms ease-in-out;
+        }
+
+        .fi-sidebar-open {
+            @apply w-64;
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) {
+            @apply w-24;
+        }
+
+
+        /* When collapsed, keep icons aligned */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-btn {
+            @apply justify-start px-0;
+        }
+
+        /* === Label === */
+        .fi-sidebar-item-label {
+            @apply transition-all duration-300;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* Instead of only opacity, also animate max-width
+           so space for the label remains during width change */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-label {
+            opacity: 0;
+            max-width: 0;        /* smoothly shrinks text */
+        }
+    }
+

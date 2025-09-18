@@ -6,10 +6,7 @@ use App\Models\Record;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use OpenSpout\Common\Entity\Style\CellAlignment;
-use OpenSpout\Common\Entity\Style\CellVerticalAlignment;
-use OpenSpout\Common\Entity\Style\Color;
-use OpenSpout\Common\Entity\Style\Style;
+use Illuminate\Support\Number;
 
 class RecordExporter extends Exporter
 {
@@ -18,8 +15,6 @@ class RecordExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-//            ExportColumn::make('id')
-//                ->label('ID'),
             ExportColumn::make('exhibition.name')->label('Exhibition name'),
             ExportColumn::make('resource.name')->label('Resource'),
             ExportColumn::make('sector.name')->label('Sector'),
@@ -45,13 +40,12 @@ class RecordExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = 'Your record export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
+        $body = 'Your record export has completed and ' . Number::format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
+            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
         }
 
         return $body;
     }
-
 }
